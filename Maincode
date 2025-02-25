@@ -1,5 +1,5 @@
 -- Configuration Section
-local Coregui = game:GetService("Coregui")
+local Coregui = game:GetService("coregui")
 local buttonSize = UDim2.new(0, 55, 0, 55)
 local buttonPosition = UDim2.new(0, 10, 0, 10)
 local unloadButtonSize = UDim2.new(0, 55, 0, 55)
