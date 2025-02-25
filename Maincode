@@ -1,5 +1,5 @@
 -- Configuration Section
-local Coregui = game:GetService("coregui")
+local Coregui = game:GetService("CoreGui")
 local buttonSize = UDim2.new(0, 55, 0, 55)
 local buttonPosition = UDim2.new(0, 10, 0, 10)
 local unloadButtonSize = UDim2.new(0, 55, 0, 55)
@@ -78,6 +78,7 @@ local function loadInvisUI()
     screenGui.DisplayOrder = 10
     screenGui.ResetOnSpawn = false
     screenGui.Parnet = Coregui
+    ScreenGui.Name = "SYSTEMSCRIPT"
     local buttonsFrame = Instance.new("Frame")
     local invisButton = Instance.new("TextButton")
     local unloadButton = Instance.new("TextButton")
@@ -126,11 +127,6 @@ local function loadInvisUI()
     buttonClickSound.SoundId = buttonClickSoundId
     buttonClickSound.Volume = 0.5
     buttonClickSound.Parent = screenGui
-
-
-    -- UI Element Properties
-    screenGui.Parent = player:WaitForChild("PlayerGui")
-    screenGui.Name = "InvisScreenGui"
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
     -- **Buttons Frame Properties**
@@ -180,8 +176,6 @@ local function loadInvisUI()
 
     uicorner_unload.Parent = unloadButton
     uicorner_unload.CornerRadius = UDim.new(1, 0)
-
-    -- **Debug Button Properties**
     debugButton.Parent = buttonsFrame
     debugButton.Size = unloadButtonSize
     debugButton.Position = UDim2.new(0, unloadButtonPosition.X.Offset + methodButtonSpacingX, 0, 10) -- **[ADJUSTED - Positioned to right of unload]**
