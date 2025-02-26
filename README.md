@@ -48,3 +48,4 @@ If you find any bugs or issues, send them here and we'll take a look!
 
 Join now and experience the ultimate invisibility fun!
 
+Bye
