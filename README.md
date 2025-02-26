@@ -20,7 +20,7 @@ This script is supported on the following executors:
 - **Xeno**
 - **Argon**
 - **Solara**
-- **Synapse X**
+- **Synapse Z**
 - **And other popular executors**
 
 ### Credits
