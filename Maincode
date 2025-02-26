@@ -1,5 +1,4 @@
 -- Configuration Section
-local Coregui = game:GetService("CoreGui")
 local buttonSize = UDim2.new(0, 55, 0, 55)
 local buttonPosition = UDim2.new(0, 10, 0, 10)
 local unloadButtonSize = UDim2.new(0, 55, 0, 55)
@@ -77,6 +76,7 @@ local function loadInvisUI()
     screenGui = Instance.new("ScreenGui")
     screenGui.DisplayOrder = 10
     screenGui.ResetOnSpawn = false
+
     local buttonsFrame = Instance.new("Frame")
     local invisButton = Instance.new("TextButton")
     local unloadButton = Instance.new("TextButton")
@@ -436,7 +436,6 @@ local function loadInvisUI()
     tooltipLabel_hideUI.Size = UDim2.new(0, 180, 0, 40)
     tooltipLabel_hideUI.Visible = false
     tooltipLabel.TextXAlignment = "Center"
-    tooltipLabel.TextYAlignment = "Center"
     tooltipLabel_hideUI.Text = "Hide/Show UI\nUI is now Enabled\nPress Z to hide"
     tooltipLabel_hideUI.Name = "HideUITooltip"
 
@@ -451,6 +450,7 @@ local function loadInvisUI()
     tooltipLabel_method1.Size = UDim2.new(0, 180, 0, 40)
     tooltipLabel_method1.Visible = false
     tooltipLabel.TextXAlignment = "Center"
+    tooltipLabel.TextYAlignment = "Center"
     tooltipLabel_method1.Text = "Method: Seat\nTeleport to seat location and sit"
     tooltipLabel_method1.Name = "Method1Tooltip"
 
@@ -719,34 +719,7 @@ local function loadInvisUI()
     end
 
 
-    -- **Function to toggle Effects**
-    local function toggleEffects()
-        buttonClickSound:Play()
-        effects_enabled = not effects_enabled
-        if DEBUG_MODE then
-            print("Toggling Effects - effects_enabled is now: " .. tostring(effects_enabled))
-        end
-
-        if effects_enabled then
-            effectsButton.Text = "Effects Enabled"
-            tooltipLabel_effects.Text = "Toggle Effects\nEffects are Enabled"
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Effects Enabled";
-                Duration = 1;
-                Text = "Visual Effects Enabled!";
-            })
-            applyEffects()
-        else
-            effectsButton.Text = "Effects Off"
-            tooltipLabel_effects.Text = "Toggle Effects\nEffects are Off"
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Effects Disabled";
-                Duration = 1;
-                Text = "Visual Effects Disabled!";
-            })
-            removeEffects()
-        end
-    end
+    -- **Function to toggle Effects
 
 
     -- **Apply Effects Function**
@@ -763,18 +736,6 @@ local function loadInvisUI()
     end
 
 
-    -- **Remove Effects Function**
-    local function removeEffects()
-        local character = player.Character
-        if character and originalCharacterColor then
-            for _, part in pairs(character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.BrickColor = originalCharacterColor
-                end
-            end
-            originalCharacterColor = nil
-        end
-    end
 
 
     -- **Function to toggle Keybinds**
@@ -1173,10 +1134,6 @@ local function loadInvisUI()
     fakeCharacterButton.MouseLeave:Connect(function() tooltipLabel_fakeCharacter.Visible = false end)
 
     -- Effects Button
-    effectsButton.MouseButton1Click:Connect(toggleEffects)
-    effectsButton.MouseEnter:Connect(function() tooltipLabel_effects.Visible = true end)
-    effectsButton.MouseLeave:Connect(function() tooltipLabel_effects.Visible = false end)
-
     -- Keybind Toggle Button
     keybindToggleButton.MouseButton1Click:Connect(toggleKeybinds)
     keybindToggleButton.MouseEnter:Connect(function() tooltipLabel_keybindToggle.Visible = true end)
