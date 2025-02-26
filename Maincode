@@ -619,7 +619,7 @@ local function loadInvisUI()
             if workspace:FindFirstChild('InvisBoxMethod2') then
                 workspace:FindFirstChild('InvisBoxMethod2'):Destroy()
                  if DEBUG_MODE then print("toggleInvisibility: InvisBoxMethod2 destroyed") end
-            en
+            end
             stopSeatReturnHeartbeat()
             currentSeatPosition = nil
 
