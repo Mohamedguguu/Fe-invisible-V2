@@ -38,11 +38,10 @@ local seatReturnHeartbeat = nil
 
 -- Keybinds Configuration
 local keybinds = {
-    toggle_invis = Enum.KeyCode.K,
+    toggle_invis = Enum.KeyCode.Z,
     toggle_fake_character = Enum.KeyCode.N,
-    toggle_effects = Enum.KeyCode.E,
     toggle_walkspeed_boost = Enum.KeyCode.B,
-    hide_ui = Enum.KeyCode.Z
+    hide_ui = Enum.KeyCode.K
 }
 
 
@@ -248,20 +247,6 @@ local function loadInvisUI()
 
     uicorner_fakeCharacter.Parent = fakeCharacterButton
     uicorner_fakeCharacter.CornerRadius = UDim.new(1, 0)
-
-    -- **Effects Button Properties**
-    effectsButton.Parent = buttonsFrame
-    effectsButton.Size = buttonSize
-    effectsButton.Position = UDim2.new(0, unloadButtonPosition.X.Offset + featureButtonSpacingX, 0, buttonPosition.Y.Offset + featureButtonYOffset)
-    effectsButton.Font = Enum.Font.SourceSansBold
-    effectsButton.Text = "Effects Off"
-    effectsButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    effectsButton.BackgroundTransparency = 0.5
-    effectsButton.BorderSizePixel = 0
-    effectsButton.Name = "EffectsButton"
-    effectsButton.AutoButtonColor = false
-    effectsButton.ClipsDescendants = true
-    effectsButton.TextSize = 14
 
     uicorner_effects.Parent = effectsButton
     uicorner_effects.CornerRadius = UDim.new(1, 0)
@@ -621,10 +606,6 @@ local function loadInvisUI()
                 end
             end
 
-            -- Apply effects if enabled
-            if effects_enabled then
-                applyEffects()
-            end
 
 
         else -- Invis Off (Cleanup)
@@ -639,8 +620,7 @@ local function loadInvisUI()
             if workspace:FindFirstChild('InvisBoxMethod2') then
                 workspace:FindFirstChild('InvisBoxMethod2'):Destroy()
                  if DEBUG_MODE then print("toggleInvisibility: InvisBoxMethod2 destroyed") end
-            end
-            removeEffects()
+            en
             stopSeatReturnHeartbeat()
             currentSeatPosition = nil
 
@@ -678,8 +658,8 @@ local function loadInvisUI()
 
             local humanoid = Instance.new("Humanoid")
             humanoid.Name = "Humanoid"
-            humanoid.MaxHealth = 999999999
-            humanoid.Health = 999999999
+            humanoid.MaxHealth = 9999999999999999999
+            humanoid.Health = 99999999999999999999999
             humanoid.Parent = fakeCharacterModel
 
             local humanoidRootPart = Instance.new("Part")
@@ -720,23 +700,6 @@ local function loadInvisUI()
 
 
     -- **Function to toggle Effects
-
-
-    -- **Apply Effects Function**
-    local function applyEffects()
-        local character = player.Character
-        if character then
-            originalCharacterColor = originalCharacterColor or character.HumanoidRootPart.BrickColor
-            for _, part in pairs(character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.BrickColor = BrickColor. random()
-                end
-            end
-        end
-    end
-
-
-
 
     -- **Function to toggle Keybinds**
     local function toggleKeybinds()
