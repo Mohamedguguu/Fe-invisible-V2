@@ -20,8 +20,9 @@ How to Execute
 
 To use this script, execute the following command in your preferred executor:
 
+```lua
 loadstring(game:HttpGet(('https://raw.githubusercontent.com/Mohamedguguu/invisible-V1-BY-MU/refs/heads/main/Maincode'),true))()
-
+```
 Supported Executors
 
 This script is supported on the following executors:
