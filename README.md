@@ -1,6 +1,6 @@
-# 🚀 UNIVERSAL INVISIBLE SCRIPT FOR ROBLOX 🎭
+# 🚀 UNIVERSAL INVISIBLE SCRIPT FE FOR ROBLOX EXPLOITING 🎭
 
-🔥 **Hello!** This is a **powerful** universal invisible script for Roblox, allowing you to go **fully invisible** in any game effortlessly! 💨
+🔥 **Hello!** This is a **powerful** universal invisible FE script for Roblox, allowing you to go **fully invisible** in any game effortlessly! 💨
 
 ## 🎨 GUI Library
 🛠️ The GUI was made using **Schlonny's UI Library**, ensuring a **smooth** and **user-friendly** experience.
@@ -32,6 +32,8 @@ This script is supported on the following executors:
 ## 🐞 Bug Reports & Community
 If you find any bugs or issues, **send them here** 📩 and we'll take a look! 
 
-🎉 **Join now and experience the ultimate invisibility fun!** 🎭
+🎉 **Join now and experience the ultimate invisibility FE fun!** 🎭
+
+# SEE YOU LATER :)
 
 
