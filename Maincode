@@ -26,7 +26,6 @@ local DEBUG_MODE = true
 -- Feature toggles
 local invis_enabled = true
 local fake_character_enabled = false
-local effects_enabled = false
 local keybind_enabled = true
 local walkspeed_boost_enabled = false
 local originalCharacterColor = nil
