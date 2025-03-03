@@ -37,3 +37,5 @@ If you find any bugs or issues, **send them here** 📩 and we'll take a look!
 # SEE YOU LATER :)
 
 
+
+![MYSCR](https://github.com/user-attachments/assets/eb0a2d2d-57b5-452f-8acf-35983d2da25d)
