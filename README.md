@@ -28,6 +28,7 @@ This script is supported on the following executors:
 ## ✨ Credits
 - 👑 **Script created by:** mohamedguguu
 - 🤝 **With the help of:** .schlonny
+-🤝 Uni gave me image 
 
 ## 🐞 Bug Reports & Community
 If you find any bugs or issues, **send them here** 📩 and we'll take a look! 
@@ -37,5 +38,4 @@ If you find any bugs or issues, **send them here** 📩 and we'll take a look!
 # SEE YOU LATER :)
 
 
-
-![MYSCR](https://github.com/user-attachments/assets/eb0a2d2d-57b5-452f-8acf-35983d2da25d)
+![image-Photoroom](https://github.com/user-attachments/assets/d2d417a6-2b8c-474d-9701-07bd02dff145)
