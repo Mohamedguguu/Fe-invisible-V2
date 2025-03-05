@@ -1,25 +1,45 @@
--- Configuration Section
-local buttonSize = UDim2.new(0, 55, 0, 55)
-local buttonPosition = UDim2.new(0, 10, 0, 10)
-local unloadButtonSize = UDim2.new(0, 55, 0, 55)
-local unloadButtonPosition = UDim2.new(0, 10, 0, 10)
-local methodButtonSize = UDim2.new(0, 55, 0, 55)
-local methodButtonSpacingX = 50 -- **[REDUCED SIGNIFICANTLY - From 65 to 50]**
-local hideUIButtonSize = UDim2.new(0, 55, 0, 55)
-local hideUIButtonPosition = UDim2.new(0, 130, 0, 10)
-local loaderCommand = "!loadinvis"
-local methodButtonYOffset = 40
-local featureButtonYOffset = 80
-local featureButtonSpacingX = 50 -- **[REDUCED SIGNIFICANTLY - From 65 to 50]**
-local moreWillComeLabelYOffset = 40
-local moreWillComeLabelSize = UDim2.new(0, 180, 0, 25)
-local buttonsFrameSize = UDim2.new(0, 280, 0, 200) -- **[SLIGHTLY REDUCED FRAME WIDTH - From 300 to 280]**
-local buttonsFramePosition = UDim2.new(1, -310, 0, 10)
+-- Configuration Section - **[ENHANCED UI CONFIG - GREAT UI Update + NoClip + Speed Textbox]**
+local primaryColor = Color3.fromRGB(50, 50, 50) -- Base button color
+local secondaryColor = Color3.fromRGB(75, 75, 75) -- Slightly lighter for frame/accents
+local highlightColor = Color3.fromRGB(100, 100, 100) -- Hover/selected color
+local textColor = Color3.White
+local cornerRadius = UDim.new(0.1, 0) -- Consistent corner radius
+
+local buttonFont = Enum.Font.SourceSansBold
+local tooltipTextSize = 14
+local buttonTextSize = 16
+
+local buttonSize = UDim2.new(0, 95, 0, 30) -- Slightly wider buttons with text
+local buttonSpacingX = 10 -- Spacing between buttons in a row
+local buttonSpacingY = 10 -- Spacing between rows of buttons
+local framePaddingX = 15 -- Padding inside the frame
+local framePaddingY = 15
+local buttonsPerRow = 3 -- How many buttons per row before wrapping
+
+local buttonsFrameSize = UDim2.new(0, (buttonSize.X.Offset + buttonSpacingX) * buttonsPerRow + 2 * framePaddingX - buttonSpacingX, 0, 300) -- Adjust frame size dynamically, increased height for new features
+local buttonsFramePosition = UDim2.new(1, -320, 0, 10) -- Adjust frame position if needed
+
+local hideUIButtonPosition = UDim2.new(0, framePaddingX, 0, framePaddingY) -- First button position in frame
+local unloadButtonPosition = UDim2.new(0, hideUIButtonPosition.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0, framePaddingY) -- Position next to hide button
+local debugButtonPosition = UDim2.new(0, unloadButtonPosition.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0, framePaddingY) -- Position next to unload button
+local invisButtonPosition = UDim2.new(0, framePaddingX, 0, hideUIButtonPosition.Y.Offset + buttonSize.Y.Offset + buttonSpacingY) -- New row
+local methodButton1Position = UDim2.new(0, invisButtonPosition.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0, invisButtonPosition.Y.Offset)
+local fakeCharacterButtonPosition =  UDim2.new(0, methodButton1Position.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0, methodButton1Position.Y.Offset)
+local keybindToggleButtonPosition = UDim2.new(0, framePaddingX, 0, invisButtonPosition.Y.Offset + (2 * (buttonSize.Y.Offset + buttonSpacingY))) -- Deeper new row
+local walkSpeedBoostButtonPosition = UDim2.new(0, keybindToggleButtonPosition.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0,  keybindToggleButtonPosition.Y.Offset)
+local noclipButtonPosition = UDim2.new(0, walkSpeedBoostButtonPosition.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0, walkSpeedBoostButtonPosition.Y.Offset)
+local keybindsTextBoxPosition = UDim2.new(0, framePaddingX, 0, walkSpeedBoostButtonPosition.Y.Offset + buttonSize.Y.Offset + buttonSpacingY + 10) -- Below speed boost
+local walkSpeedTextBoxPosition = UDim2.new(0, walkSpeedBoostButtonPosition.X.Offset, 0, walkSpeedBoostButtonPosition.Y.Offset + buttonSize.Y.Offset + buttonSpacingY) -- Below Speed Boost Button
+
+
+local moreWillComeLabelYOffset = 15 -- Closer to the bottom
+local moreWillComeLabelSize = UDim2.new(0, 220, 0, 25) -- Slightly wider label
+local summonUIButtonSize = UDim2.new(0, 150, 0, 40) -- Wider summon button
+
+
 local buttonClickSoundId = "rbxassetid://232127604"
 local seatAreaReturnEnabled = true
 local seatAreaDistanceThreshold = 10
-
-
 local DEBUG_MODE = true
 
 
@@ -28,6 +48,7 @@ local invis_enabled = true
 local fake_character_enabled = false
 local keybind_enabled = true
 local walkspeed_boost_enabled = false
+local noclip_enabled = false -- Feature toggle
 local originalCharacterColor = nil
 local fakeCharacterModel = nil
 local seatTeleportPosition = Vector3.new(-25.95, 84, 3537.55)
@@ -40,7 +61,8 @@ local keybinds = {
     toggle_invis = Enum.KeyCode.Z,
     toggle_fake_character = Enum.KeyCode.N,
     toggle_walkspeed_boost = Enum.KeyCode.B,
-    hide_ui = Enum.KeyCode.K
+    hide_ui = Enum.KeyCode.K,
+    toggle_noclip = Enum.KeyCode.X -- **[NEW - NoClip Keybind]**
 }
 
 
@@ -82,13 +104,14 @@ local function loadInvisUI()
     local methodButton1 = Instance.new("TextButton")
     local hideUIButton = Instance.new("TextButton")
     local fakeCharacterButton = Instance.new("TextButton")
-    local effectsButton = Instance.new("TextButton")
     local howDoesItWorkLabel = Instance.new("TextButton")
     local moreWillComeLabel = Instance.new("TextLabel")
     local keybindToggleButton = Instance.new("TextButton")
     local walkSpeedBoostButton = Instance.new("TextButton")
     local summonUIButton = Instance.new("TextButton")
     local keybindsTextBox = Instance.new("TextBox") -- **[NEW] Keybinds TextBox**
+    local walkSpeedTextBox = Instance.new("TextBox") -- **[NEW] Walk Speed Textbox**
+    local noclipButton = Instance.new("TextButton") -- **[NEW] NoClip Button**
 
 
     local uicorner_frame = Instance.new("UICorner")
@@ -98,24 +121,26 @@ local function loadInvisUI()
     local uicorner_method1 = Instance.new("UICorner")
     local uicorner_hideUI = Instance.new("UICorner")
     local uicorner_fakeCharacter = Instance.new("UICorner")
-    local uicorner_effects = Instance.new("UICorner")
     local uicorner_keybindToggle = Instance.new("UICorner")
     local uicorner_walkSpeedBoost = Instance.new("UICorner")
     local uicorner_summonUI = Instance.new("UICorner")
     local uicorner_keybindsTextBox = Instance.new("UICorner") -- **[NEW] Keybinds TextBox UICorner**
+    local uicorner_walkSpeedTextBox = Instance.new("UICorner") -- **[NEW] Walk Speed Textbox UICorner**
+    local uicorner_noclip = Instance.new("UICorner") -- **[NEW] NoClip Button UICorner**
 
 
-    local tooltipLabel = Instance.new("TextLabel")
+    local tooltipLabel_invis = Instance.new("TextLabel")
     local tooltipLabel_unload = Instance.new("TextLabel")
     local tooltipLabel_debug = Instance.new("TextLabel")
     local tooltipLabel_method1 = Instance.new("TextLabel")
     local tooltipLabel_hideUI = Instance.new("TextLabel")
     local tooltipLabel_fakeCharacter = Instance.new("TextLabel")
-    local tooltipLabel_effects = Instance.new("TextLabel")
     local tooltipLabel_howDoesItWork = Instance.new("TextLabel")
     local tooltipLabel_keybindToggle = Instance.new("TextLabel")
     local tooltipLabel_walkSpeedBoost = Instance.new("TextLabel")
     local tooltipLabel_keybindsTextBox = Instance.new("TextLabel") -- **[NEW] Keybinds TextBox Tooltip**
+    local tooltipLabel_walkSpeedTextBox = Instance.new("TextLabel") -- **[NEW] Walk Speed Textbox Tooltip**
+    local tooltipLabel_noclip = Instance.new("TextLabel") -- **[NEW] NoClip Button Tooltip**
 
 
     -- **Button Click Sound Setup**
@@ -134,183 +159,230 @@ local function loadInvisUI()
     buttonsFrame.Parent = screenGui
     buttonsFrame.Size = buttonsFrameSize
     buttonsFrame.Position = buttonsFramePosition
-    buttonsFrame.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    buttonsFrame.BackgroundTransparency = 0.6
+    buttonsFrame.BackgroundColor3 = secondaryColor -- Use secondary color
+    buttonsFrame.BackgroundTransparency = 0.7 -- Slightly more transparent
     buttonsFrame.BorderSizePixel = 0
     buttonsFrame.Name = "ButtonsFrame"
     buttonsFrame.ClipsDescendants = true
 
     uicorner_frame.Parent = buttonsFrame
-    uicorner_frame.CornerRadius = UDim.new(0.1, 0)
+    uicorner_frame.CornerRadius = cornerRadius
 
-
-    -- **Invis Button Properties**
-    invisButton.Parent = buttonsFrame
-    invisButton.Size = buttonSize
-    invisButton.Position = buttonPosition
-    invisButton.Font = Enum.Font.SourceSansBold
-    invisButton.Text = "✅"
-    invisButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    invisButton.BackgroundTransparency = 0.5
-    invisButton.BorderSizePixel = 0
-    invisButton.Name = "InvisButton"
-    invisButton.AutoButtonColor = false
-    invisButton.ClipsDescendants = true
-    invisButton.TextSize = 24
-
-    uicorner_invis.Parent = invisButton
-    uicorner_invis.CornerRadius = UDim.new(1, 0)
-
-    -- **Unload Button Properties**
-    unloadButton.Parent = buttonsFrame
-    unloadButton.Size = unloadButtonSize
-    unloadButton.Position = unloadButtonPosition
-    unloadButton.Font = Enum.Font.SourceSansBold
-    unloadButton.Text = "❌"
-    unloadButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-    unloadButton.BackgroundTransparency = 0.5
-    unloadButton.BorderSizePixel = 0
-    unloadButton.Name = "UnloadButton"
-    unloadButton.AutoButtonColor = false
-    unloadButton.ClipsDescendants = true
-    unloadButton.TextSize = 24
-
-    uicorner_unload.Parent = unloadButton
-    uicorner_unload.CornerRadius = UDim.new(1, 0)
-
-    -- **Debug Button Properties**
-    debugButton.Parent = buttonsFrame
-    debugButton.Size = unloadButtonSize
-    debugButton.Position = UDim2.new(0, unloadButtonPosition.X.Offset + methodButtonSpacingX, 0, 10) -- **[ADJUSTED - Positioned to right of unload]**
-    debugButton.Font = Enum.Font.SourceSansBold
-    debugButton.Text = "🐛"
-    debugButton.BackgroundColor3 = Color3.fromRGB(200, 200, 0)
-    debugButton.BackgroundTransparency = 0.5
-    debugButton.BorderSizePixel = 0
-    debugButton.Name = "DebugButton"
-    debugButton.AutoButtonColor = false
-    debugButton.ClipsDescendants = true
-    debugButton.TextSize = 24
-
-    uicorner_debug.Parent = debugButton
-    uicorner_debug.CornerRadius = UDim.new(1, 0)
 
     -- **Hide UI Button Properties**
     hideUIButton.Parent = buttonsFrame
-    hideUIButton.Size = hideUIButtonSize
+    hideUIButton.Size = buttonSize
     hideUIButton.Position = hideUIButtonPosition
-    hideUIButton.Font = Enum.Font.SourceSansBold
-    hideUIButton.Text = "👁️"
-    hideUIButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    hideUIButton.Font = buttonFont -- Use font variable
+    hideUIButton.Text = "Hide UI" -- Text Label!
+    hideUIButton.BackgroundColor3 = primaryColor -- Use primary color
     hideUIButton.BackgroundTransparency = 0.5
     hideUIButton.BorderSizePixel = 0
     hideUIButton.Name = "HideUIButton"
     hideUIButton.AutoButtonColor = false
     hideUIButton.ClipsDescendants = true
-    hideUIButton.TextSize = 24
+    hideUIButton.TextSize = buttonTextSize -- Use size variable
+    hideUIButton.TextColor3 = textColor -- Use text color variable
 
     uicorner_hideUI.Parent = hideUIButton
-    uicorner_hideUI.CornerRadius = UDim.new(1, 0)
+    uicorner_hideUI.CornerRadius = cornerRadius
+
+    -- **Unload Button Properties**
+    unloadButton.Parent = buttonsFrame
+    unloadButton.Size = buttonSize
+    unloadButton.Position = unloadButtonPosition
+    unloadButton.Font = buttonFont
+    unloadButton.Text = "Unload" -- Text Label!
+    unloadButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0) -- Keep red for unload
+    unloadButton.BackgroundTransparency = 0.5
+    unloadButton.BorderSizePixel = 0
+    unloadButton.Name = "UnloadButton"
+    unloadButton.AutoButtonColor = false
+    unloadButton.ClipsDescendants = true
+    unloadButton.TextSize = buttonTextSize
+    unloadButton.TextColor3 = textColor
+
+    uicorner_unload.Parent = unloadButton
+    uicorner_unload.CornerRadius = cornerRadius
+
+    -- **Debug Button Properties**
+    debugButton.Parent = buttonsFrame
+    debugButton.Size = buttonSize
+    debugButton.Position = debugButtonPosition
+    debugButton.Font = buttonFont
+    debugButton.Text = "Debug" -- Text Label!
+    debugButton.BackgroundColor3 = Color3.fromRGB(200, 200, 0) -- Keep yellow for debug
+    debugButton.BackgroundTransparency = 0.5
+    debugButton.BorderSizePixel = 0
+    debugButton.Name = "DebugButton"
+    debugButton.AutoButtonColor = false
+    debugButton.ClipsDescendants = true
+    debugButton.TextSize = buttonTextSize
+    debugButton.TextColor3 = textColor
+
+    uicorner_debug.Parent = debugButton
+    uicorner_debug.CornerRadius = cornerRadius
+
+    -- **Invis Button Properties**
+    invisButton.Parent = buttonsFrame
+    invisButton.Size = buttonSize
+    invisButton.Position = invisButtonPosition -- Move to the next row in first column
+    invisButton.Font = buttonFont
+    invisButton.Text = "Invis: Off" -- More descriptive text
+    invisButton.BackgroundColor3 = primaryColor
+    invisButton.BackgroundTransparency = 0.5
+    invisButton.BorderSizePixel = 0
+    invisButton.Name = "InvisButton"
+    invisButton.AutoButtonColor = false
+    invisButton.ClipsDescendants = true
+    invisButton.TextSize = buttonTextSize
+    invisButton.TextColor3 = textColor
+
+    uicorner_invis.Parent = invisButton
+    uicorner_invis.CornerRadius = cornerRadius
+
 
     -- **Method 1 Button (Seat) Properties**
     methodButton1.Parent = buttonsFrame
-    methodButton1.Size = methodButtonSize
-    methodButton1.Position = UDim2.new(0, unloadButtonPosition.X.Offset, 0, buttonPosition.Y.Offset + methodButtonYOffset)
-    methodButton1.Font = Enum.Font.SourceSansBold
-    methodButton1.Text = "Seat"
-    methodButton1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    methodButton1.Size = buttonSize
+    methodButton1.Position = methodButton1Position -- Position in the next column
+    methodButton1.Font = buttonFont
+    methodButton1.Text = "Method: Seat"
+    methodButton1.BackgroundColor3 = primaryColor
     methodButton1.BackgroundTransparency = 0.5
     methodButton1.BorderSizePixel = 0
     methodButton1.Name = "MethodButton1"
     methodButton1.AutoButtonColor = false
     methodButton1.ClipsDescendants = true
-    methodButton1.TextSize = 18
+    methodButton1.TextSize = buttonTextSize
+    methodButton1.TextColor3 = textColor
 
     uicorner_method1.Parent = methodButton1
-    uicorner_method1.CornerRadius = UDim.new(1, 0)
+    uicorner_method1.CornerRadius = cornerRadius
 
 
     -- **Fake Character Button Properties**
     fakeCharacterButton.Parent = buttonsFrame
     fakeCharacterButton.Size = buttonSize
-    fakeCharacterButton.Position = UDim2.new(0, buttonPosition.X.Offset + featureButtonSpacingX, 0, buttonPosition.Y.Offset + featureButtonYOffset)
-    fakeCharacterButton.Font = Enum.Font.SourceSansBold
-    fakeCharacterButton.Text = "Fake Char Off"
-    fakeCharacterButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    fakeCharacterButton.Position = fakeCharacterButtonPosition -- Position in the next column
+    fakeCharacterButton.Font = buttonFont
+    fakeCharacterButton.Text = "Fake Char: Off" -- More descriptive text
+    fakeCharacterButton.BackgroundColor3 = primaryColor
     fakeCharacterButton.BackgroundTransparency = 0.5
     fakeCharacterButton.BorderSizePixel = 0
     fakeCharacterButton.Name = "FakeCharacterButton"
     fakeCharacterButton.AutoButtonColor = false
     fakeCharacterButton.ClipsDescendants = true
-    fakeCharacterButton.TextSize = 14
+    fakeCharacterButton.TextSize = buttonTextSize
+    fakeCharacterButton.TextColor3 = textColor
 
     uicorner_fakeCharacter.Parent = fakeCharacterButton
-    uicorner_fakeCharacter.CornerRadius = UDim.new(1, 0)
+    uicorner_fakeCharacter.CornerRadius = cornerRadius
 
-    uicorner_effects.Parent = effectsButton
-    uicorner_effects.CornerRadius = UDim.new(1, 0)
 
     -- **Keybind Toggle Button Properties**
     keybindToggleButton.Parent = buttonsFrame
     keybindToggleButton.Size = buttonSize
-    keybindToggleButton.Position = UDim2.new(0, hideUIButtonPosition.X.Offset + featureButtonSpacingX, 0, buttonPosition.Y.Offset + featureButtonYOffset)
-    keybindToggleButton.Font = Enum.Font.SourceSansBold
-    keybindToggleButton.Text = "Keybinds Off"
-    keybindToggleButton.BackgroundColor3 = Color3.fromRGB(50, 100, 50)
+    keybindToggleButton.Position = keybindToggleButtonPosition -- Deeper New Row, First Column
+    keybindToggleButton.Font = buttonFont
+    keybindToggleButton.Text = "Keybinds: On" -- Assuming default is on, adjust text later in logic
+    keybindToggleButton.BackgroundColor3 = primaryColor
     keybindToggleButton.BackgroundTransparency = 0.5
     keybindToggleButton.BorderSizePixel = 0
     keybindToggleButton.Name = "KeybindToggleButton"
     keybindToggleButton.AutoButtonColor = false
     keybindToggleButton.ClipsDescendants = true
-    keybindToggleButton.TextSize = 14
+    keybindToggleButton.TextSize = buttonTextSize
+    keybindToggleButton.TextColor3 = textColor
 
     uicorner_keybindToggle.Parent = keybindToggleButton
-    uicorner_keybindToggle.CornerRadius = UDim.new(1, 0)
+    uicorner_keybindToggle.CornerRadius = cornerRadius
 
     -- **Walk Speed Boost Button Properties**
     walkSpeedBoostButton.Parent = buttonsFrame
     walkSpeedBoostButton.Size = buttonSize
-    walkSpeedBoostButton.Position = UDim2.new(0, keybindToggleButton.Position.X.Offset + featureButtonSpacingX, 0, buttonPosition.Y.Offset + featureButtonYOffset)
-    walkSpeedBoostButton.Font = Enum.Font.SourceSansBold
-    walkSpeedBoostButton.Text = "Speed Off" -- **[SHORTENED Button Text]**
-    walkSpeedBoostButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    walkSpeedBoostButton.Position = walkSpeedBoostButtonPosition -- New Row, Second Column
+    walkSpeedBoostButton.Font = buttonFont
+    walkSpeedBoostButton.Text = "Speed Boost: Off"
+    walkSpeedBoostButton.BackgroundColor3 = primaryColor
     walkSpeedBoostButton.BackgroundTransparency = 0.5
     walkSpeedBoostButton.BorderSizePixel = 0
     walkSpeedBoostButton.Name = "WalkSpeedBoostButton"
     walkSpeedBoostButton.AutoButtonColor = false
     walkSpeedBoostButton.ClipsDescendants = true
-    walkSpeedBoostButton.TextSize = 14
+    walkSpeedBoostButton.TextSize = buttonTextSize
+    walkSpeedBoostButton.TextColor3 = textColor
 
     uicorner_walkSpeedBoost.Parent = walkSpeedBoostButton
-    uicorner_walkSpeedBoost.CornerRadius = UDim.new(1, 0)
+    uicorner_walkSpeedBoost.CornerRadius = cornerRadius
+
+    -- **NoClip Button Properties** **[NEW - NoClip Button]**
+    noclipButton.Parent = buttonsFrame
+    noclipButton.Size = buttonSize
+    noclipButton.Position = noclipButtonPosition
+    noclipButton.Font = buttonFont
+    noclipButton.Text = "NoClip: Off"
+    noclipButton.BackgroundColor3 = primaryColor
+    noclipButton.BackgroundTransparency = 0.5
+    noclipButton.BorderSizePixel = 0
+    noclipButton.Name = "NoClipButton"
+    noclipButton.AutoButtonColor = false
+    noclipButton.ClipsDescendants = true
+    noclipButton.TextSize = buttonTextSize
+    noclipButton.TextColor3 = textColor
+
+    uicorner_noclip.Parent = noclipButton
+    uicorner_noclip.CornerRadius = cornerRadius
+
 
     -- **Keybinds TextBox Properties** **[NEW Textbox Properties]**
     keybindsTextBox.Parent = buttonsFrame
-    keybindsTextBox.Size = UDim2.new(0, 280, 0, 30) -- Slightly wider textbox
-    keybindsTextBox.Position = UDim2.new(0.5, 0, 1, 10) -- Position below the buttons
-    keybindsTextBox.AnchorPoint = Vector2.new(0.5, 1) -- Anchor to bottom center
-    keybindsTextBox.Font = Enum.Font.SourceSansBold
-    keybindsTextBox.TextSize = 14
-    keybindsTextBox.PlaceholderText = "Click to Edit Keybinds (e.g., K,N,E,B,Z)"
-    keybindsTextBox.ClearTextOnFocus = false -- Keep placeholder text even when focused
-    keybindsTextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    keybindsTextBox.Size =  UDim2.new(0, buttonsFrameSize.X.Offset - 2 * framePaddingX, 0, 30) -- Textbox width matches frame width minus padding
+    keybindsTextBox.Position = keybindsTextBoxPosition
+    keybindsTextBox.AnchorPoint = Vector2.new(0, 0) -- Anchor to top left within the frame
+    keybindsTextBox.Font = buttonFont
+    keybindsTextBox.TextSize = buttonTextSize - 2 -- Slightly smaller textbox text
+    keybindsTextBox.PlaceholderText = "Edit Keybinds (Z,N,K,B,X)"
+    keybindsTextBox.ClearTextOnFocus = false
+    keybindsTextBox.BackgroundColor3 = primaryColor
     keybindsTextBox.BackgroundTransparency = 0.5
-    keybindsTextBox.TextColor3 = Color3.new(1, 1, 1)
+    keybindsTextBox.TextColor3 = textColor
     keybindsTextBox.BorderSizePixel = 0
     keybindsTextBox.Name = "KeybindsTextBox"
     keybindsTextBox.ClipsDescendants = true
 
     uicorner_keybindsTextBox.Parent = keybindsTextBox
-    uicorner_keybindsTextBox.CornerRadius = UDim.new(0.1, 0)
+    uicorner_keybindsTextBox.CornerRadius = cornerRadius
+
+    -- **Walk Speed Textbox Properties** **[NEW Textbox for Speed]**
+    walkSpeedTextBox.Parent = buttonsFrame
+    walkSpeedTextBox.Size = UDim2.new(0, buttonSize.X.Offset, 0, 30) -- Same width as button
+    walkSpeedTextBox.Position = walkSpeedTextBoxPosition -- Below Speed Boost Button
+    walkSpeedTextBox.AnchorPoint = Vector2.new(0, 0)
+    walkSpeedTextBox.Font = buttonFont
+    walkSpeedTextBox.TextSize = buttonTextSize - 2
+    walkSpeedTextBox.PlaceholderText = "Speed Value"
+    walkSpeedTextBox.ClearTextOnFocus = false
+    walkSpeedTextBox.BackgroundColor3 = primaryColor
+    walkSpeedTextBox.BackgroundTransparency = 0.5
+    walkSpeedTextBox.TextColor3 = textColor
+    walkSpeedTextBox.BorderSizePixel = 0
+    walkSpeedTextBox.Name = "WalkSpeedTextBox"
+    walkSpeedTextBox.ClipsDescendants = true
+    walkSpeedTextBox.Text = "50" -- Default Speed Value
+
+    local uicorner_walkSpeedTextBox = Instance.new("UICorner")
+    uicorner_walkSpeedTextBox.Parent = walkSpeedTextBox
+    uicorner_walkSpeedTextBox.CornerRadius = cornerRadius
 
 
     -- **Summon UI Button Properties**
     summonUIButton.Parent = screenGui
-    summonUIButton.Size = UDim2.new(0, 120, 0, 50)
-    summonUIButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+    summonUIButton.Size = summonUIButtonSize
+    summonUIButton.Position = UDim2.new(0.5, 0, 0.85, 0) -- Move Summon button lower and closer to center
     summonUIButton.AnchorPoint = Vector2.new(0.5, 0.5)
-    summonUIButton.Font = Enum.Font.SourceSansBold
-    summonUIButton.Text = "Okay - Reload UI"
+    summonUIButton.Font = buttonFont
+    summonUIButton.Text = "Reload UI" -- Shortened Text
     summonUIButton.BackgroundColor3 = Color3.fromRGB(80, 120, 80)
     summonUIButton.BackgroundTransparency = 0.5
     summonUIButton.BorderSizePixel = 0
@@ -318,201 +390,220 @@ local function loadInvisUI()
     summonUIButton.AutoButtonColor = false
     summonUIButton.ClipsDescendants = true
     summonUIButton.Visible = false
-    summonUIButton.TextSize = 18
-
+    summonUIButton.TextSize = buttonTextSize
 
     uicorner_summonUI.Parent = summonUIButton
-    uicorner_summonUI.CornerRadius = UDim.new(0.2, 0)
+    uicorner_summonUI.CornerRadius = cornerRadius
 
 
     -- **"How does it work?" Button Properties**
     howDoesItWorkLabel.Parent = screenGui
-    howDoesItWorkLabel.Size = UDim2.new(0, 25, 0, 25)
-    howDoesItWorkLabel.Position = UDim2.new(1, buttonsFramePosition.X.Offset + hideUIButtonPosition.X.Offset - methodButtonSpacingX + 5, 0, 15)
-    howDoesItWorkLabel.Font = Enum.Font.SourceSansBold
+    howDoesItWorkLabel.Size =  UDim2.new(0, 30, 0, 30) -- Slightly larger
+    howDoesItWorkLabel.Position = UDim2.new(1, buttonsFramePosition.X.Offset + framePaddingX - 5, 0, buttonsFramePosition.Y.Offset + framePaddingY - 5) -- Top Left of frame
+    howDoesItWorkLabel.AnchorPoint = Vector2.new(1,0) -- Anchor to top right
+    howDoesItWorkLabel.Font = buttonFont
     howDoesItWorkLabel.Text = "?"
-    howDoesItWorkLabel.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
+    howDoesItWorkLabel.BackgroundColor3 = highlightColor -- Use highlight color
     howDoesItWorkLabel.BackgroundTransparency = 0.5
     howDoesItWorkLabel.BorderSizePixel = 0
     howDoesItWorkLabel.Name = "HowDoesItWorkButton"
     howDoesItWorkLabel.AutoButtonColor = false
     howDoesItWorkLabel.ClipsDescendants = true
-    howDoesItWorkLabel.TextSize = 16
-    howDoesItWorkLabel.TextColor3 = Color3.new(0,0,0)
+    howDoesItWorkLabel.TextSize = buttonTextSize
+    howDoesItWorkLabel.TextColor3 = textColor
 
-    local uicorner_howDoesItWork = Instance.new("UICorner")
     uicorner_howDoesItWork.Parent = howDoesItWorkLabel
-    uicorner_howDoesItWork.CornerRadius = UDim.new(1, 0)
+    uicorner_howDoesItWork.CornerRadius = UDim.new(0.5, 0) -- More rounded
+
 
     -- **"More will come" Label Properties**
     moreWillComeLabel.Parent = screenGui
     moreWillComeLabel.Size = moreWillComeLabelSize
-    moreWillComeLabel.Position = UDim2.new(0.5, 0, 1, moreWillComeLabelYOffset)
+    moreWillComeLabel.Position = UDim2.new(0.5, 0, 1, -moreWillComeLabelYOffset) -- Position closer to bottom
     moreWillComeLabel.AnchorPoint = Vector2.new(0.5, 1)
-    moreWillComeLabel.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    moreWillComeLabel.BackgroundTransparency = 0.5
+    moreWillComeLabel.BackgroundColor3 = secondaryColor -- Use secondary color
+    moreWillComeLabel.BackgroundTransparency = 0.7 -- Match frame transparency
     moreWillComeLabel.BorderSizePixel = 0
-    moreWillComeLabel.Font = Enum.Font.SourceSansBold
-    moreWillComeLabel.TextSize = 18
-    moreWillComeLabel.TextColor3 = Color3.new(1, 1, 1)
-    moreWillComeLabel.Text = "More will come..."
+    moreWillComeLabel.Font = buttonFont
+    moreWillComeLabel.TextSize = 16
+    moreWillComeLabel.TextColor3 = textColor
+    moreWillComeLabel.Text = "More features coming soon..." -- Updated text
     moreWillComeLabel.TextXAlignment = "Center"
     moreWillComeLabel.TextYAlignment = "Center"
     moreWillComeLabel.Name = "MoreWillComeLabel"
     local uicorner_moreWillCome = Instance.new("UICorner")
     uicorner_moreWillCome.Parent = moreWillComeLabel
-    uicorner_moreWillCome.CornerRadius = UDim.new(0.1, 0)
+    uicorner_moreWillCome.CornerRadius = cornerRadius
 
 
     -- **Tooltip Label properties**
-    tooltipLabel.Parent = screenGui
-    tooltipLabel.BackgroundTransparency = 1
-    tooltipLabel.TextColor3 = Color3.new(1, 1, 1)
-    tooltipLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-    tooltipLabel.TextStrokeTransparency = 0.5
-    tooltipLabel.Font = Enum.Font.SourceSansBold
-    tooltipLabel.TextSize = 16
-    tooltipLabel.Position = UDim2.new(1, buttonsFramePosition.X.Offset + buttonPosition.X.Offset, 0, buttonsFramePosition.Y.Offset + buttonPosition.Y.Offset + buttonSize.Y.Offset/2 + 35)
-    tooltipLabel.Size = UDim2.new(0, 180, 0, 40)
-    tooltipLabel.Visible = false
-    tooltipLabel.TextXAlignment = "Center"
-    tooltipLabel.TextYAlignment = "Center"
-    tooltipLabel.Text = "Toggles Invisibility\n(Current Method: Seat)"
-    tooltipLabel.Name = "InvisTooltip"
+    tooltipLabel_invis.Parent = screenGui
+    tooltipLabel_invis.BackgroundTransparency = 1
+    tooltipLabel_invis.TextColor3 = textColor
+    tooltipLabel_invis.TextStrokeColor3 = Color3.Black
+    tooltipLabel_invis.TextStrokeTransparency = 0.5
+    tooltipLabel_invis.Font = buttonFont
+    tooltipLabel_invis.TextSize = tooltipTextSize
+    tooltipLabel_invis.Position = UDim2.new(1, buttonsFramePosition.X.Offset + invisButton.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + invisButton.Position.Y.Offset + buttonSize.Y.Offset + 5) -- Position below first button row
+    tooltipLabel_invis.Size = UDim2.new(0, 200, 0, 40) -- Slightly wider tooltips
+    tooltipLabel_invis.Visible = false
+    tooltipLabel_invis.TextXAlignment = "Center"
+    tooltipLabel_invis.TextYAlignment = "Top" -- Align text to top for better readability
+    tooltipLabel_invis.Text = "Toggles Invisibility\n(Current Method: Seat, Keybind: Z)"
+    tooltipLabel_invis.Name = "InvisTooltip"
 
     tooltipLabel_unload.Parent = screenGui
     tooltipLabel_unload.BackgroundTransparency = 1
-    tooltipLabel.TextColor3 = Color3.new(1, 1, 1)
-    tooltipLabel_unload.TextStrokeColor3 = Color3.new(0, 0, 0)
+    tooltipLabel_unload.TextColor3 = textColor
+    tooltipLabel_unload.TextStrokeColor3 = Color3.Black
     tooltipLabel_unload.TextStrokeTransparency = 0.5
-    tooltipLabel_unload.Font = Enum.Font.SourceSansBold
-    tooltipLabel_unload.TextSize = 16
-    tooltipLabel_unload.Position = UDim2.new(1, buttonsFramePosition.X.Offset + unloadButtonPosition.X.Offset, 0, buttonsFramePosition.Y.Offset + unloadButtonPosition.Y.Offset + unloadButtonSize.Y.Offset/2 + 35)
-    tooltipLabel_unload.Size = UDim2.new(0, 220, 0, 40)
+    tooltipLabel_unload.Font = buttonFont
+    tooltipLabel_unload.TextSize = tooltipTextSize
+    tooltipLabel_unload.Position = UDim2.new(1, buttonsFramePosition.X.Offset + unloadButtonPosition.X.Offset, 0, buttonsFramePosition.Y.Offset + unloadButtonPosition.Y.Offset + buttonSize.Y.Offset + 5)
+    tooltipLabel_unload.Size = UDim2.new(0, 200, 0, 40)
     tooltipLabel_unload.Visible = false
-    tooltipLabel.TextXAlignment = "Center"
-    tooltipLabel.TextYAlignment = "Center"
-    tooltipLabel_unload.Text = "Unload All & Reset\nClick to Remove EVERYTHING"
+    tooltipLabel_unload.TextXAlignment = "Center"
+    tooltipLabel_unload.TextYAlignment = "Top"
+    tooltipLabel_unload.Text = "Unload UI & Reset Script"
     tooltipLabel_unload.Name = "UnloadTooltip"
 
     tooltipLabel_debug.Parent = screenGui
     tooltipLabel_debug.BackgroundTransparency = 1
-    tooltipLabel.TextColor3 = Color3.new(1, 1, 1)
-    tooltipLabel_debug.TextStrokeColor3 = Color3.new(0, 0, 0)
+    tooltipLabel_debug.TextColor3 = textColor
+    tooltipLabel_debug.TextStrokeColor3 = Color3.Black
     tooltipLabel_debug.TextStrokeTransparency = 0.5
-    tooltipLabel_debug.Font = Enum.Font.SourceSansBold
-    tooltipLabel_debug.TextSize = 16
-    tooltipLabel_debug.Position = UDim2.new(0, 100, 0, 100)
-    tooltipLabel_debug.Size = UDim2.new(0, 180, 0, 40)
+    tooltipLabel_debug.Font = buttonFont
+    tooltipLabel_debug.TextSize = tooltipTextSize
+    tooltipLabel_debug.Position = UDim2.new(1, buttonsFramePosition.X.Offset + debugButtonPosition.X.Offset, 0, buttonsFramePosition.Y.Offset + debugButtonPosition.Y.Offset + buttonSize.Y.Offset + 5)
+    tooltipLabel_debug.Size = UDim2.new(0, 200, 0, 40)
     tooltipLabel_debug.Visible = false
-    tooltipLabel.TextXAlignment = "Center"
-    tooltipLabel_debug.Text = "Toggle Debug Mode\nEnable/Disable Debug Prints"
+    tooltipLabel_debug.TextXAlignment = "Center"
+    tooltipLabel_debug.TextYAlignment = "Top"
+    tooltipLabel_debug.Text = "Toggle Debug Mode\n(Prints to Output)"
     tooltipLabel_debug.Name = "DebugTooltip"
 
     tooltipLabel_hideUI.Parent = screenGui
     tooltipLabel_hideUI.BackgroundTransparency = 1
-    tooltipLabel.TextColor3 = Color3.new(1, 1, 1)
-    tooltipLabel_hideUI.TextStrokeColor3 = Color3.new(0, 0, 0)
+    tooltipLabel_hideUI.TextColor3 = textColor
+    tooltipLabel_hideUI.TextStrokeColor3 = Color3.Black
     tooltipLabel_hideUI.TextStrokeTransparency = 0.5
-    tooltipLabel_hideUI.Font = Enum.Font.SourceSansBold
-    tooltipLabel_hideUI.TextSize = 16
-    tooltipLabel_hideUI.Position = UDim2.new(1, buttonsFramePosition.X.Offset + hideUIButtonPosition.X.Offset, 0, buttonsFramePosition.Y.Offset + hideUIButtonPosition.Y.Offset + hideUIButtonSize.Y.Offset/2 + 35)
-    tooltipLabel_hideUI.Size = UDim2.new(0, 180, 0, 40)
+    tooltipLabel_hideUI.Font = buttonFont
+    tooltipLabel_hideUI.TextSize = tooltipTextSize
+    tooltipLabel_hideUI.Position = UDim2.new(1, buttonsFramePosition.X.Offset + hideUIButtonPosition.X.Offset, 0, buttonsFramePosition.Y.Offset + hideUIButtonPosition.Y.Offset + buttonSize.Y.Offset + 5)
+    tooltipLabel_hideUI.Size = UDim2.new(0, 200, 0, 40)
     tooltipLabel_hideUI.Visible = false
-    tooltipLabel.TextXAlignment = "Center"
-    tooltipLabel_hideUI.Text = "Hide/Show UI\nUI is now Enabled\nPress Z to hide"
+    tooltipLabel_hideUI.TextXAlignment = "Center"
+    tooltipLabel_hideUI.TextYAlignment = "Top"
+    tooltipLabel_hideUI.Text = "Hide/Show UI\n(Keybind: K)"
     tooltipLabel_hideUI.Name = "HideUITooltip"
 
     tooltipLabel_method1.Parent = screenGui
     tooltipLabel_method1.BackgroundTransparency = 1
-    tooltipLabel.TextColor3 = Color3.new(1, 1, 1)
-    tooltipLabel_method1.TextStrokeColor3 = Color3.new(0, 0, 0)
+    tooltipLabel_method1.TextColor3 = textColor
+    tooltipLabel_method1.TextStrokeColor3 = Color3.Black
     tooltipLabel_method1.TextStrokeTransparency = 0.5
-    tooltipLabel_method1.Font = Enum.Font.SourceSansBold
-    tooltipLabel_method1.TextSize = 16
-    tooltipLabel_method1.Position = UDim2.new(1, buttonsFramePosition.X.Offset + methodButton1.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + methodButton1.Position.Y.Offset + tooltipLabel.Size.Y.Offset - 10)
-    tooltipLabel_method1.Size = UDim2.new(0, 180, 0, 40)
+    tooltipLabel_method1.Font = buttonFont
+    tooltipLabel_method1.TextSize = tooltipTextSize
+    tooltipLabel_method1.Position = UDim2.new(1, buttonsFramePosition.X.Offset + methodButton1.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + methodButton1.Position.Y.Offset + buttonSize.Y.Offset + 5)
+    tooltipLabel_method1.Size = UDim2.new(0, 200, 0, 40)
     tooltipLabel_method1.Visible = false
-    tooltipLabel.TextXAlignment = "Center"
-    tooltipLabel.TextYAlignment = "Center"
-    tooltipLabel_method1.Text = "Method: Seat\nTeleport to seat location and sit"
+    tooltipLabel_method1.TextXAlignment = "Center"
+    tooltipLabel_method1.TextYAlignment = "Top"
+    tooltipLabel_method1.Text = "Invisibility Method:\nSeat Teleport"
     tooltipLabel_method1.Name = "Method1Tooltip"
 
 
     tooltipLabel_fakeCharacter.Parent = screenGui
     tooltipLabel_fakeCharacter.BackgroundTransparency = 1
-    tooltipLabel.TextColor3 = Color3.new(1, 1, 1)
-    tooltipLabel_fakeCharacter.TextStrokeColor3 = Color3.new(0, 0, 0)
+    tooltipLabel_fakeCharacter.TextColor3 = textColor
+    tooltipLabel_fakeCharacter.TextStrokeColor3 = Color3.Black
     tooltipLabel_fakeCharacter.TextStrokeTransparency = 0.5
-    tooltipLabel_fakeCharacter.Font = Enum.Font.SourceSansBold
-    tooltipLabel_fakeCharacter.TextSize = 16
-    tooltipLabel_fakeCharacter.Position = UDim2.new(1, buttonsFramePosition.X.Offset + fakeCharacterButton.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + fakeCharacterButton.Position.Y.Offset + tooltipLabel.Size.Y.Offset - 10)
-    tooltipLabel_fakeCharacter.Size = UDim2.new(0, 180, 0, 40)
+    tooltipLabel_fakeCharacter.Font = buttonFont
+    tooltipLabel_fakeCharacter.TextSize = tooltipTextSize
+    tooltipLabel_fakeCharacter.Position = UDim2.new(1, buttonsFramePosition.X.Offset + fakeCharacterButton.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + fakeCharacterButton.Position.Y.Offset + buttonSize.Y.Offset + 5)
+    tooltipLabel_fakeCharacter.Size = UDim2.new(0, 200, 0, 40)
     tooltipLabel_fakeCharacter.Visible = false
-    tooltipLabel.TextXAlignment = "Center"
-    tooltipLabel.TextYAlignment = "Center"
-    tooltipLabel_fakeCharacter.Text = "Toggle Fake Character\nSpawns a very strong fake character\nPress N to toggle"
+    tooltipLabel_fakeCharacter.TextXAlignment = "Center"
+    tooltipLabel_fakeCharacter.TextYAlignment = "Top"
+    tooltipLabel_fakeCharacter.Text = "Toggle Fake Character\n(Keybind: N)"
     tooltipLabel_fakeCharacter.Name = "FakeCharacterTooltip"
 
-    tooltipLabel_effects.Parent = screenGui
-    tooltipLabel_effects.BackgroundTransparency = 1
-    tooltipLabel.TextColor3 = Color3.new(1, 1, 1)
-    tooltipLabel_effects.TextStrokeColor3 = Color3.new(0, 0, 0)
-    tooltipLabel_effects.TextStrokeTransparency = 0.5
-    tooltipLabel_effects.Font = Enum.Font.SourceSansBold
-    tooltipLabel_effects.TextSize = 16
-    tooltipLabel_effects.Position = UDim2.new(1, buttonsFramePosition.X.Offset + effectsButton.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + effectsButton.Position.Y.Offset + tooltipLabel.Size.Y.Offset - 10)
-    tooltipLabel_effects.Size = UDim2.new(0, 180, 0, 40)
-    tooltipLabel_effects.Visible = false
-    tooltipLabel.TextXAlignment = "Center"
-    tooltipLabel.TextYAlignment = "Center"
-    tooltipLabel_effects.Text = "Toggle Effects\nVisual character effects\nPress E to toggle"
-    tooltipLabel_effects.Name = "EffectsTooltip"
 
     tooltipLabel_keybindToggle.Parent = screenGui
     tooltipLabel_keybindToggle.BackgroundTransparency = 1
-    tooltipLabel.TextColor3 = Color3.new(1, 1, 1)
-    tooltipLabel_keybindToggle.TextStrokeColor3 = Color3.new(0, 0, 0)
+    tooltipLabel_keybindToggle.TextColor3 = textColor
+    tooltipLabel_keybindToggle.TextStrokeColor3 = Color3.Black
     tooltipLabel_keybindToggle.TextStrokeTransparency = 0.5
-    tooltipLabel_keybindToggle.Font = Enum.Font.SourceSansBold
-    tooltipLabel_keybindToggle.TextSize = 16
-    tooltipLabel_keybindToggle.Position = UDim2.new(1, buttonsFramePosition.X.Offset + keybindToggleButton.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + keybindToggleButton.Position.Y.Offset + tooltipLabel.Size.Y.Offset - 10)
-    tooltipLabel_keybindToggle.Size = UDim2.new(0, 180, 0, 40)
+    tooltipLabel_keybindToggle.Font = buttonFont
+    tooltipLabel_keybindToggle.TextSize = tooltipTextSize
+    tooltipLabel_keybindToggle.Position = UDim2.new(1, buttonsFramePosition.X.Offset + keybindToggleButton.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + keybindToggleButton.Position.Y.Offset + buttonSize.Y.Offset + 5)
+    tooltipLabel_keybindToggle.Size = UDim2.new(0, 200, 0, 40)
     tooltipLabel_keybindToggle.Visible = false
-    tooltipLabel.TextXAlignment = "Center"
-    tooltipLabel.TextYAlignment = "Center"
-    tooltipLabel_keybindToggle.Text = "Toggle Keybinds\nEnable/Disable Keybinds\nPress B to toggle Walk Speed Boost"
+    tooltipLabel_keybindToggle.TextXAlignment = "Center"
+    tooltipLabel_keybindToggle.TextYAlignment = "Top"
+    tooltipLabel_keybindToggle.Text = "Enable/Disable Keybinds\n(Currently Enabled)" -- Adjust based on initial state
     tooltipLabel_keybindToggle.Name = "KeybindTooltip"
 
     tooltipLabel_walkSpeedBoost.Parent = screenGui
     tooltipLabel_walkSpeedBoost.BackgroundTransparency = 1
-    tooltipLabel.TextColor3 = Color3.new(1, 1, 1)
-    tooltipLabel_walkSpeedBoost.TextStrokeColor3 = Color3.new(0, 0, 0)
+    tooltipLabel_walkSpeedBoost.TextColor3 = textColor
+    tooltipLabel_walkSpeedBoost.TextStrokeColor3 = Color3.Black
     tooltipLabel_walkSpeedBoost.TextStrokeTransparency = 0.5
-    tooltipLabel_walkSpeedBoost.Font = Enum.Font.SourceSansBold
-    tooltipLabel_walkSpeedBoost.TextSize = 16
-    tooltipLabel_walkSpeedBoost.Position = UDim2.new(1, buttonsFramePosition.X.Offset + walkSpeedBoostButton.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + walkSpeedBoostButton.Position.Y.Offset + tooltipLabel.Size.Y.Offset - 10)
-    tooltipLabel_walkSpeedBoost.Size = UDim2.new(0, 180, 0, 40)
+    tooltipLabel_walkSpeedBoost.Font = buttonFont
+    tooltipLabel_walkSpeedBoost.TextSize = tooltipTextSize
+    tooltipLabel_walkSpeedBoost.Position = UDim2.new(1, buttonsFramePosition.X.Offset + walkSpeedBoostButton.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + walkSpeedBoostButton.Position.Y.Offset + buttonSize.Y.Offset + 5)
+    tooltipLabel_walkSpeedBoost.Size = UDim2.new(0, 200, 0, 40)
     tooltipLabel_walkSpeedBoost.Visible = false
-    tooltipLabel.TextXAlignment = "Center"
-    tooltipLabel.TextYAlignment = "Center"
-    tooltipLabel_walkSpeedBoost.Text = "Toggle Speed Boost\nMove faster!\nPress B to toggle" -- **[SHORTENED Tooltip Text]**
+    tooltipLabel_walkSpeedBoost.TextXAlignment = "Center"
+    tooltipLabel_walkSpeedBoost.TextYAlignment = "Top"
+    tooltipLabel_walkSpeedBoost.Text = "Toggle Walk Speed Boost\n(Keybind: B)"
     tooltipLabel_walkSpeedBoost.Name = "WalkSpeedBoostTooltip"
 
     tooltipLabel_keybindsTextBox.Parent = screenGui -- **[NEW] Keybinds Textbox Tooltip**
     tooltipLabel_keybindsTextBox.BackgroundTransparency = 1
-    tooltipLabel.TextColor3 = Color3.new(1, 1, 1)
-    tooltipLabel_keybindsTextBox.TextStrokeColor3 = Color3.new(0, 0, 0)
+    tooltipLabel_keybindsTextBox.TextColor3 = textColor
+    tooltipLabel_keybindsTextBox.TextStrokeColor3 = Color3.Black
     tooltipLabel_keybindsTextBox.TextStrokeTransparency = 0.5
-    tooltipLabel_keybindsTextBox.Font = Enum.Font.SourceSansBold
-    tooltipLabel_keybindsTextBox.TextSize = 14
-    tooltipLabel_keybindsTextBox.Position = UDim2.new(0.5, 0, 1, keybindsTextBox.Position.Y.Offset + 20) -- Position below the textbox
+    tooltipLabel_keybindsTextBox.Font = buttonFont
+    tooltipLabel_keybindsTextBox.TextSize = tooltipTextSize
+    tooltipLabel_keybindsTextBox.Position = UDim2.new(0.5, 0, 1, keybindsTextBox.Position.Y.Offset + keybindsTextBox.Size.Y.Offset + 10) -- Below textbox
     tooltipLabel_keybindsTextBox.Size = UDim2.new(0, 220, 0, 40)
     tooltipLabel_keybindsTextBox.Visible = false
-    tooltipLabel.TextXAlignment = "Center"
-    tooltipLabel.TextYAlignment = "Top"
-    tooltipLabel_keybindsTextBox.Text = "Edit Keybinds Here\nEnter key codes separated by commas (e.g., K,N,E,B,Z)"
+    tooltipLabel_keybindsTextBox.TextXAlignment = "Center"
+    tooltipLabel_keybindsTextBox.TextYAlignment = "Top"
+    tooltipLabel_keybindsTextBox.Text = "Edit Keybinds (Comma Separated)\nExample: Z,N,K,B,X"
     tooltipLabel_keybindsTextBox.Name = "KeybindsTextBoxTooltip"
+
+    tooltipLabel_walkSpeedTextBox.Parent = screenGui -- **[NEW] Walk Speed Textbox Tooltip**
+    tooltipLabel_walkSpeedTextBox.BackgroundTransparency = 1
+    tooltipLabel_walkSpeedTextBox.TextColor3 = textColor
+    tooltipLabel_walkSpeedTextBox.TextStrokeColor3 = Color3.Black
+    tooltipLabel_walkSpeedTextBox.TextStrokeTransparency = 0.5
+    tooltipLabel_walkSpeedTextBox.Font = buttonFont
+    tooltipLabel_walkSpeedTextBox.TextSize = tooltipTextSize
+    tooltipLabel_walkSpeedTextBox.Position = UDim2.new(1, buttonsFramePosition.X.Offset + walkSpeedTextBox.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + walkSpeedTextBox.Position.Y.Offset + walkSpeedTextBox.Size.Y.Offset + 5)
+    tooltipLabel_walkSpeedTextBox.Size = UDim2.new(0, 200, 0, 40)
+    tooltipLabel_walkSpeedTextBox.Visible = false
+    tooltipLabel_walkSpeedTextBox.TextXAlignment = "Center"
+    tooltipLabel_walkSpeedTextBox.TextYAlignment = "Top"
+    tooltipLabel_walkSpeedTextBox.Text = "Enter desired walk speed\n(Numbers only)"
+    tooltipLabel_walkSpeedTextBox.Name = "WalkSpeedTextBoxTooltip"
+
+    tooltipLabel_noclip.Parent = screenGui -- **[NEW] NoClip Button Tooltip**
+    tooltipLabel_noclip.BackgroundTransparency = 1
+    tooltipLabel_noclip.TextColor3 = textColor
+    tooltipLabel_noclip.TextStrokeColor3 = Color3.Black
+    tooltipLabel_noclip.TextStrokeTransparency = 0.5
+    tooltipLabel_noclip.Font = buttonFont
+    tooltipLabel_noclip.TextSize = tooltipTextSize
+    tooltipLabel_noclip.Position = UDim2.new(1, buttonsFramePosition.X.Offset + noclipButton.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + noclipButton.Position.Y.Offset + noclipButton.Size.Y.Offset + 5)
+    tooltipLabel_noclip.Size = UDim2.new(0, 200, 0, 40)
+    tooltipLabel_noclip.Visible = false
+    tooltipLabel_noclip.TextXAlignment = "Center"
+    tooltipLabel_noclip.TextYAlignment = "Top"
+    tooltipLabel_noclip.Text = "Toggle NoClip Mode\n(Keybind: X)"
+    tooltipLabel_noclip.Name = "NoClipTooltip"
+
 
 
     -- **Function to set character transparency**
@@ -539,8 +630,8 @@ local function loadInvisUI()
         if invis_on then
             if current_method == 1 then -- Method 1: Seat
                 setCharacterTransparency(0.5)
-                invisButton.Text = "👻"
-                tooltipLabel.Text = "Invisibility Enabled\n(Current Method: Seat)"
+                invisButton.Text = "Invis: On" -- Text Update!
+                tooltipLabel_invis.Text = "Invisibility Enabled\n(Current Method: Seat, Keybind: Z)" -- Tooltip Update!
 
                 local character = player.Character
                 if character then
@@ -609,8 +700,8 @@ local function loadInvisUI()
 
         else -- Invis Off (Cleanup)
             setCharacterTransparency(0)
-            invisButton.Text = "✅"
-            tooltipLabel.Text = "Toggles Invisibility\n(Current Method: Seat)"
+            invisButton.Text = "Invis: Off" -- Text Update!
+            tooltipLabel_invis.Text = "Toggle Invisibility\n(Current Method: Seat, Keybind: Z)" -- Tooltip Update!
 
             if workspace:FindFirstChild('invischair') then
                 workspace:FindFirstChild('invischair'):Destroy()
@@ -618,7 +709,7 @@ local function loadInvisUI()
             end
             if workspace:FindFirstChild('InvisBoxMethod2') then
                 workspace:FindFirstChild('InvisBoxMethod2'):Destroy()
-                 if DEBUG_MODE then print("toggleInvisibility: InvisBoxMethod2 destroyed") end
+                if DEBUG_MODE then print("toggleInvisibility: InvisBoxMethod2 destroyed") end
             end
             stopSeatReturnHeartbeat()
             currentSeatPosition = nil
@@ -642,23 +733,21 @@ local function loadInvisUI()
         end
 
         if fake_character_enabled then
-            fakeCharacterButton.Text = "Fake Char Enabled"
-            tooltipLabel_fakeCharacter.Text = "Toggle Fake Character\nFake Character is Enabled"
+            fakeCharacterButton.Text = "Fake Char: On" -- Text Update!
+            tooltipLabel_fakeCharacter.Text = "Toggle Fake Character\nFake Character is Enabled\n(Keybind: N)" -- Tooltip Update!
             game.StarterGui:SetCore("SendNotification", {
                 Title = "Fake Character Enabled";
                 Duration = 1;
-                Text = "Fake Character Enabled - A strong fake character is spawned!";
+                Text = "Fake Character Enabled - A fake character is spawned!";
             })
 
-            -- **Create Fake Character Logic**
+            -- **Create Basic Fake Character Logic** (Simplified - No "stronger" character)
             fakeCharacterModel = Instance.new("Model")
             fakeCharacterModel.Name = "FakeCharacterModel"
             fakeCharacterModel.Parent = workspace
 
             local humanoid = Instance.new("Humanoid")
             humanoid.Name = "Humanoid"
-            humanoid.MaxHealth = 9999999999999999999
-            humanoid.Health = 99999999999999999999999
             humanoid.Parent = fakeCharacterModel
 
             local humanoidRootPart = Instance.new("Part")
@@ -669,36 +758,21 @@ local function loadInvisUI()
             humanoidRootPart.Transparency = 0.5
             humanoidRootPart.BrickColor = BrickColor.Green()
             humanoidRootPart.Parent = fakeCharacterModel
-
-            local face = Instance.new("Decal")
-            face.Face = "Front"
-            face.Texture = "rbxassetid://1044375932"
-            face.Parent = humanoidRootPart
-
-            humanoid:MoveTo(player.Character.HumanoidRootPart.Position + Vector3.new(5,0,0))
-            if DEBUG_MODE then print("Fake Character Spawned with Health: ", humanoid.Health, " MaxHealth: ", humanoid.MaxHealth) end
-
-
-        else -- Fake Character Disabled
-            fakeCharacterButton.Text = "Fake Char Off"
-            tooltipLabel_fakeCharacter.Text = "Toggle Fake Character\nFake Character is Off"
+        else
+            fakeCharacterButton.Text = "Fake Char: Off" -- Text Update!
+            tooltipLabel_fakeCharacter.Text = "Toggle Fake Character\nFake Character is Disabled\n(Keybind: N)" -- Tooltip Update!
             game.StarterGui:SetCore("SendNotification", {
                 Title = "Fake Character Disabled";
                 Duration = 1;
                 Text = "Fake Character Disabled - Fake character removed.";
             })
-
-            -- **Destroy Fake Character Logic**
             if fakeCharacterModel then
                 fakeCharacterModel:Destroy()
                 fakeCharacterModel = nil
-                if DEBUG_MODE then print("Fake Character Destroyed.") end
             end
         end
     end
 
-
-    -- **Function to toggle Effects
 
     -- **Function to toggle Keybinds**
     local function toggleKeybinds()
@@ -709,20 +783,20 @@ local function loadInvisUI()
         end
 
         if keybind_enabled then
-            keybindToggleButton.Text = "Keybinds Enabled"
-            tooltipLabel_keybindToggle.Text = "Toggle Keybinds\nKeybinds are Enabled"
+            keybindToggleButton.Text = "Keybinds: On" -- Text Update!
+            tooltipLabel_keybindToggle.Text = "Enable/Disable Keybinds\nKeybinds are Enabled\n(Press K to Hide UI)" -- Tooltip Update!
             game.StarterGui:SetCore("SendNotification", {
                 Title = "Keybinds Enabled";
                 Duration = 1;
-                Text = "Keybinds Enabled!";
+                Text = "Keybinds Enabled - Keybinds are now active!";
             })
         else
-            keybindToggleButton.Text = "Keybinds Off"
-            tooltipLabel_keybindToggle.Text = "Toggle Keybinds\nKeybinds are Off"
+            keybindToggleButton.Text = "Keybinds: Off" -- Text Update!
+            tooltipLabel_keybindToggle.Text = "Toggle Keybinds\nKeybinds are Disabled" -- Tooltip Update!
             game.StarterGui:SetCore("SendNotification", {
                 Title = "Keybinds Disabled";
                 Duration = 1;
-                Text = "Keybinds Disabled!";
+                Text = "Keybinds Disabled - Keybinds are now inactive.";
             })
         end
     end
@@ -731,475 +805,355 @@ local function loadInvisUI()
     local function toggleWalkSpeedBoost()
         buttonClickSound:Play()
         walkspeed_boost_enabled = not walkspeed_boost_enabled
+
+        local speedValue = tonumber(walkSpeedTextBox.Text) -- Get value from textbox, convert to number
+        if not speedValue then
+            speedValue = 50 -- Default speed if textbox is invalid
+            walkSpeedTextBox.Text = "50" -- Reset textbox to default
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Invalid Speed Value";
+                Duration = 2;
+                Text = "Using default speed (50). Please enter numbers only in Speed Textbox.";
+            })
+        end
+
+
         if DEBUG_MODE then
-            print("Toggling Walk Speed Boost - walkspeed_boost_enabled is now: " .. tostring(walkspeed_boost_enabled))
+            print("Toggling Walk Speed Boost - walkspeed_boost_enabled is now: " .. tostring(walkspeed_boost_enabled) .. ", Speed Value: " .. speedValue)
+        end
+
+        if walkspeed_boost_enabled then
+            walkSpeedBoostButton.Text = "Speed Boost: On"
+            tooltipLabel_walkSpeedBoost.Text = "Toggle Walk Speed Boost\nSpeed Boost is Enabled\n(Keybind: B)"
+            player.Character.Humanoid.WalkSpeed = speedValue -- Set walk speed from textbox
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Speed Boost Enabled";
+                Duration = 1;
+                Text = "Walk speed increased to " .. speedValue;
+            })
+        else
+            walkSpeedBoostButton.Text = "Speed Boost: Off"
+            tooltipLabel_walkSpeedBoost.Text = "Toggle Walk Speed Boost\nSpeed Boost is Disabled\n(Keybind: B)"
+            player.Character.Humanoid.WalkSpeed = 16 -- Reset to default walk speed
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Speed Boost Disabled";
+                Duration = 1;
+                Text = "Walk speed reset to default.";
+            })
+        end
+    end
+
+    -- **Function to toggle NoClip**
+    local function toggleNoClip()
+        buttonClickSound:Play()
+        noclip_enabled = not noclip_enabled
+
+        if DEBUG_MODE then
+            print("Toggling NoClip - noclip_enabled is now: " .. tostring(noclip_enabled))
         end
 
         local character = player.Character
-        if character and character:FindFirstChild("Humanoid") then
-            local humanoid = character:FindFirstChild("Humanoid")
-            if walkspeed_boost_enabled then
-                walkSpeedBoostButton.Text = "Speed Enabled" -- **[SHORTENED Button Text]**
-                tooltipLabel_walkSpeedBoost.Text = "Toggle Speed Boost\nWalk Speed Boost is Enabled"
+        if character then
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    if noclip_enabled then
+                        part.CanCollide = false
+                    else
+                        part.CanCollide = true
+                    end
+                end
+            end
+
+            if noclip_enabled then
+                noclipButton.Text = "NoClip: On"
+                tooltipLabel_noclip.Text = "Toggle NoClip Mode\nNoClip is Enabled\n(Keybind: X)"
+                player.Character.Humanoid.JumpPower = 0 -- Disable jump in noclip
+                player.Character.Humanoid.WalkSpeed = tonumber(walkSpeedTextBox.Text) * 1.5 -- Increase speed slightly in noclip for noclip
                 game.StarterGui:SetCore("SendNotification", {
-                    Title = "Walk Speed Boost Enabled";
+                    Title = "NoClip Enabled";
                     Duration = 1;
-                    Text = "Walk Speed Boost Enabled!";
+                    Text = "NoClip mode ON. Use X to toggle off.";
                 })
-                humanoid.WalkSpeed = humanoid.WalkSpeed * 2
             else
-                walkSpeedBoostButton.Text = "Speed Off" -- **[SHORTENED Button Text]**
-                tooltipLabel_walkSpeedBoost.Text = "Toggle Speed Boost\nWalk Speed Boost is Off"
+                noclipButton.Text = "NoClip: Off"
+                tooltipLabel_noclip.Text = "Toggle NoClip Mode\nNoClip is Disabled\n(Keybind: X)"
+                player.Character.Humanoid.JumpPower = 50 -- Restore default jump
+                player.Character.Humanoid.WalkSpeed = tonumber(walkSpeedTextBox.Text) -- Restore walk speed to speed textbox value
                 game.StarterGui:SetCore("SendNotification", {
-                    Title = "Walk Speed Boost Disabled";
+                    Title = "NoClip Disabled";
                     Duration = 1;
-                    Text = "Walk Speed Boost Disabled!";
+                    Text = "NoClip mode OFF.";
                 })
-                humanoid.WalkSpeed = humanoid.WalkSpeed / 2
             end
         else
-            warn("Character or Humanoid not found for Walk Speed Boost!")
-            walkspeed_boost_enabled = false
-            walkSpeedBoostButton.Text = "Speed Off"
+            warn("Character not found for NoClip!")
             game.StarterGui:SetCore("SendNotification", {
-                Title = "Walk Speed Boost Error";
+                Title = "NoClip Failed";
                 Duration = 2;
-                Text = "Walk Speed Boost failed. Character/Humanoid not found.";
+                Text = "Character not found. NoClip could not be toggled.";
             })
         end
     end
 
 
-    -- **Function to toggle UI visibility**
-    local function toggleUIHidden()
+    -- **Function to Hide/Show UI**
+    local function toggleUIHide()
         buttonClickSound:Play()
         ui_hidden = not ui_hidden
         if DEBUG_MODE then
-            print("Toggling UI Hidden - ui_hidden is now: " .. tostring(ui_hidden))
+            print("Toggling UI visibility - ui_hidden is now: " .. tostring(ui_hidden))
         end
 
         if ui_hidden then
-            screenGui.Enabled = false
+            buttonsFrame.Visible = false
+            summonUIButton.Visible = true
             hideUIButton.Text = "👁️"
-            tooltipLabel_hideUI.Text = "Hide/Show UI\nUI is now HIDDEN\nPress Z to show"
+            tooltipLabel_hideUI.Text = "Show UI\nUI is now Hidden\nPress K to Show"
             game.StarterGui:SetCore("SendNotification", {
                 Title = "UI Hidden";
                 Duration = 1;
-                Text = "UI is now hidden. Press 'Z' to show.";
+                Text = "UI Hidden - Use keybind (K) or 'Reload UI' to show.";
             })
         else
-            screenGui.Enabled = true
-            hideUIButton.Text = "👁️"
-            tooltipLabel_hideUI.Text = "Hide/Show UI\nUI is now Enabled\nPress Z to hide"
+            buttonsFrame.Visible = true
+            summonUIButton.Visible = false
+            hideUIButton.Text = "Hide UI" -- Text update!
+            tooltipLabel_hideUI.Text = "Hide UI\nUI is now Enabled\nPress K to hide" -- Tooltip update!
             game.StarterGui:SetCore("SendNotification", {
-                Title = "UI Enabled";
+                Title = "UI Shown";
                 Duration = 1;
-                Text = "UI is now visible.";
+                Text = "UI Shown - UI is now visible.";
             })
         end
     end
 
-
-    -- **Custom UNLOAD UI Function**
-    local function createUnloadUI()
-        local unloadConfirmationFrame = Instance.new("Frame")
-        local yesButton = Instance.new("TextButton")
-        local noButton = Instance.new("TextButton")
-        local unloadingLabel = Instance.new("TextLabel")
-
-        -- Frame Properties
-        unloadConfirmationFrame.Parent = screenGui
-        unloadConfirmationFrame.Size = UDim2.new(0, 250, 0, 150)
-        unloadConfirmationFrame.Position = UDim2.new(0.5, 0, -0.5, 0)
-        unloadConfirmationFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-        unloadConfirmationFrame.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-        unloadConfirmationFrame.BackgroundTransparency = 0.8
-        unloadConfirmationFrame.BorderSizePixel = 0
-        unloadConfirmationFrame.Name = "UnloadConfirmationFrame"
-        unloadConfirmationFrame.ClipsDescendants = true
-
-        local frame_uicorner = Instance.new("UICorner")
-        frame_uicorner.Parent = unloadConfirmationFrame
-        frame_uicorner.CornerRadius = UDim.new(0.1, 0)
-
-        -- Yes Button Properties
-        yesButton.Parent = unloadConfirmationFrame
-        yesButton.Size = UDim2.new(0, 80, 0, 40)
-        yesButton.Position = UDim2.new(0.15, 0, 0.65, 0)
-        yesButton.AnchorPoint = Vector2.new(0, 0)
-        yesButton.Font = Enum.Font.SourceSansBold
-        yesButton.Text = "Yes"
-        yesButton.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
-        yesButton.BackgroundTransparency = 0.5
-        yesButton.BorderSizePixel = 0
-        yesButton.Name = "YesButton"
-        yesButton.AutoButtonColor = false
-        yesButton.ClipsDescendants = true
-
-        local yes_uicorner = Instance.new("UICorner")
-        yes_uicorner.Parent = yesButton
-        yes_uicner.CornerRadius = UDim.new(1, 0)
-
-        -- No Button Properties
-        noButton.Parent = unloadConfirmationFrame
-        noButton.Size = UDim2.new(0, 80, 0, 40)
-        noButton.Position = UDim2.new(0.85, 0, 0.65, 0)
-        noButton.AnchorPoint = Vector2.new(1, 0)
-        noButton.Font = Enum.Font.SourceSansBold
-        noButton.Text = "No"
-        noButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-        noButton.BackgroundTransparency = 0.5
-        noButton.BorderSizePixel = 0
-        noButton.Name = "NoButton"
-        noButton.AutoButtonColor = false
-        noButton.ClipsDescendants = true
-
-        local no_uicorner = Instance.new("UICorner")
-        no_uicner.Parent = noButton
-        no_uicner.CornerRadius = UDim.new(1, 0)
-
-        -- Confirmation Text Label
-        local confirmationLabel = Instance.new("TextLabel")
-        confirmationLabel.Parent = unloadConfirmationFrame
-        confirmationLabel.Size = UDim2.new(1, 0, 0.4, 0)
-        confirmationLabel.Position = UDim2.new(0, 0, 0.1, 0)
-        confirmationLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        confirmationLabel.BackgroundTransparency = 1
-        confirmationLabel.Font = Enum.Font.SourceSansBold
-        confirmationLabel.TextSize = 20
-        confirmationLabel.TextColor3 = Color3.new(1, 1, 1)
-        confirmationLabel.Text = "Unload Invis Button?"
-        confirmationLabel.TextXAlignment = "Center"
-        confirmationLabel.TextYAlignment = "Center"
-        confirmationLabel.Name = "ConfirmationLabel"
-
-
-        -- "Unloading..." Label Properties (Initially Invisible)
-        unloadingLabel.Parent = unloadConfirmationFrame
-        unloadingLabel.Size = UDim2.new(1, 0, 0.2, 0)
-        unloadingLabel.Position = UDim2.new(0, 0, 0.4, 0)
-        unloadingLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        unloadingLabel.BackgroundTransparency = 1
-        unloadingLabel.Font = Enum.Font.SourceSansBold
-        unloadingLabel.TextSize = 16
-        unloadingLabel.TextColor3 = Color3.new(1, 1, 1)
-        unloadingLabel.Text = "Unloading..."
-        unloadingLabel.TextXAlignment = "Center"
-        unloadingLabel.TextYAlignment = "Center"
-        unloadingLabel.Visible = false
-        unloadingLabel.Name = "UnloadingLabel"
-
-
-        -- Yes Button Click Action
-        yesButton.MouseButton1Click:Connect(function()
-            buttonClickSound:Play()
-            if DEBUG_MODE then print("UnloadButtonFunc: User confirmed unload (Yes Button).") end
-
-            -- Show "Unloading..." label and hide buttons
-            unloadingLabel.Visible = true
-            confirmationLabel.Visible = false
-            yesButton.Visible = false
-            noButton.Visible = false
-
-            -- Perform Unload Actions
-            setCharacterTransparency(0)
+    -- **Function to Unload UI and Reset Script**
+    local function unloadUI()
+        buttonClickSound:Play()
+        if screenGui then
+            screenGui:Destroy()
+            screenGui = nil
+            ui_hidden = false
             invis_on = false
-            invisButton.Text = "✅"
-
-            if workspace:FindFirstChild('invischair') then
-                workspace:FindFirstChild('invischair'):Destroy()
-                if DEBUG_MODE then print("createUnloadUI: invischair destroyed") end
-            end
-            if workspace:FindFirstChild('InvisBoxMethod2') then
-                workspace:FindFirstChild('InvisBoxMethod2'):Destroy()
-                 if DEBUG_MODE then print("createUnloadUI: InvisBoxMethod2 destroyed") end
-            end
-
-            if workspace:FindFirstChild('InvisSkybox') then
-                workspace:FindFirstChild('InvisSkybox'):Destroy()
-            end
-            removeEffects()
-            if fakeCharacterModel then
-                fakeCharacterModel:Destroy()
-                fakeCharacterModel = nil
-                if DEBUG_MODE then print("createUnloadUI: fakeCharacterModel destroyed") end
-            end
-
-            stopSeatReturnHeartbeat()
-            currentSeatPosition = nil
+            fake_character_enabled = false
+            keybind_enabled = true -- Reset keybind state to default ON
+            walkspeed_boost_enabled = false -- Reset speed boost to default OFF
+            noclip_enabled = false -- Reset noclip to default OFF
 
 
-            if DEBUG_MODE then print("UnloadButtonFunc: Checking screenGui validity...") end
-            if screenGui and IsValid(screenGui) then
-                if DEBUG_MODE then print("UnloadButtonFunc: Destroying screenGui...") end
-                screenGui:Destroy()
-                screenGui = nil
-                if DEBUG_MODE then print("UnloadButtonFunc: screenGui destroyed.") end
-            else
-                if DEBUG_MODE then print("UnloadButtonFunc: screenGui is NOT valid or nil, skipping destroy.") end
-            end
+            -- Reset Button Texts and Tooltips to defaults
+            invisButton.Text = "Invis: Off"
+            tooltipLabel_invis.Text = "Toggle Invisibility\n(Current Method: Seat, Keybind: Z)"
+            fakeCharacterButton.Text = "Fake Char: Off"
+            tooltipLabel_fakeCharacter.Text = "Toggle Fake Character\n(Keybind: N)"
+            keybindToggleButton.Text = "Keybinds: On"
+            tooltipLabel_keybindToggle.Text = "Enable/Disable Keybinds\n(Currently Enabled)"
+            walkSpeedBoostButton.Text = "Speed Boost: Off"
+            tooltipLabel_walkSpeedBoost.Text = "Toggle Walk Speed Boost\n(Keybind: B)"
+            noclipButton.Text = "NoClip: Off"
+            tooltipLabel_noclip.Text = "Toggle NoClip Mode\n(Keybind: X)"
+            hideUIButton.Text = "Hide UI"
+            tooltipLabel_hideUI.Text = "Hide/Show UI\n(Keybind: K)"
 
-            if DEBUG_MODE then print("UnloadButtonFunc: Checking script validity...") end
-            if script and IsValid(script) then
-                if DEBUG_MODE then print("UnloadButtonFunc: Destroying script...") end
-                script:Destroy()
-                if DEBUG_MODE then print("UnloadButtonFunc: script destroyed.") end
-            else
-                if DEBUG_MODE then print("UnloadButtonFunc: script is NOT valid or nil, skipping destroy.") end
-            end
 
             game.StarterGui:SetCore("SendNotification", {
-                Title = "Unloaded Invis UI";
+                Title = "UI Unloaded";
                 Duration = 2;
-                Text = "UI and script have been removed.",
+                Text = "UI Unloaded and script states reset.";
             })
-        end)
-
-        -- No Button Click Action
-        noButton.MouseButton1Click:Connect(function()
-            buttonClickSound:Play()
-            if DEBUG_MODE then print("UnloadButtonFunc: User declined unload (No Button).") end
-            unloadConfirmationFrame:Destroy()
-        end)
+            if DEBUG_MODE then print("UnloadUI: UI Destroyed and script reset.") end
+        else
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "UI Not Loaded";
+                Duration = 2;
+                Text = "UI is not currently loaded.";
+            })
+            if DEBUG_MODE then print("UnloadUI: UI was not loaded.") end
+        end
     end
 
 
-    -- **Function to start Seat Return Heartbeat**
-    local function startSeatReturnHeartbeat()
-        if not seatAreaReturnEnabled then return end
+    -- **Function to handle method button clicks**
+    local function setMethod(methodNumber)
+        buttonClickSound:Play()
+        current_method = methodNumber
+        if DEBUG_MODE then
+            print("Method set to: " .. current_method)
+        end
 
-        if seatReturnHeartbeat then return end
+        if methodNumber == 1 then
+            methodButton1.Text = "Method: Seat"
+            tooltipLabel_method1.Text = "Invisibility Method:\nSeat Teleport"
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Method Changed";
+                Duration = 1;
+                Text = "Invisibility method set to: Seat Teleport.";
+            })
+        end
+    end
 
-        seatReturnHeartbeat = runService.Heartbeat:Connect(function()
-            if not invis_on or not currentSeatPosition or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-                stopSeatReturnHeartbeat()
-                return
-            end
+    -- **Function to Update Keybinds from TextBox**
+    local function updateKeybinds()
+        local keybindText = keybindsTextBox.Text
+        local keyCodes = string.split(keybindText, ",") -- Split by commas
 
-            local distance = (player.Character.HumanoidRootPart.Position - currentSeatPosition).Magnitude
-            if distance > seatAreaDistanceThreshold then
-                if DEBUG_MODE then print("SeatReturnHeartbeat: Player distance from seat exceeded threshold. RTP back to seat.") end
-                player.Character:MoveTo(seatTeleportPosition)
+        local newKeybinds = {}
+        local keyNames = {"toggle_invis", "toggle_fake_character", "hide_ui", "toggle_walkspeed_boost", "toggle_noclip"} -- Order MUST match input
+
+        for i, keyCodeString in ipairs(keyCodes) do
+            keyCodeString = string.trim(keyCodeString) -- Remove extra spaces
+            local keyCodeEnum = Enum.KeyCode:FindByName(keyCodeString:upper()) -- Convert text to Enum.KeyCode
+
+            if keyCodeEnum and keyNames[i] then -- Valid KeyCode and key name exists
+                newKeybinds[keyNames[i]] = keyCodeEnum
+            else
                 game.StarterGui:SetCore("SendNotification", {
-                    Title = "Returning to Seat Area";
-                    Duration = 1;
-                    Text = "You moved too far from the seat area. Returning you.";
+                    Title = "Invalid Keybind";
+                    Duration = 3;
+                    Text = "Invalid key code: '" .. keyCodeString .. "' or too many/few keycodes. Using defaults (Z,N,K,B,X). Example: Z,N,K,B,X";
                 })
+                -- If error, revert to default keybinds and reset textbox text
+                newKeybinds = {
+                    toggle_invis = Enum.KeyCode.Z,
+                    toggle_fake_character = Enum.KeyCode.N,
+                    hide_ui = Enum.KeyCode.K,
+                    toggle_walkspeed_boost = Enum.KeyCode.B,
+                    toggle_noclip = Enum.KeyCode.X
+                }
+                local defaultKeybindText = ""
+                for j, name in ipairs(keyNames) do
+                    defaultKeybindText = defaultKeybindText .. newKeybinds[name].Name .. (j < #keyNames and "," or "")
+                end
+                keybindsTextBox.Text = defaultKeybindText
+                return -- Exit function after error and reset
             end
-        end)
-        if DEBUG_MODE then print("SeatReturnHeartbeat: Started.") end
+        end
+        keybinds = newKeybinds -- Update keybinds table if all are valid
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Keybinds Updated";
+            Duration = 2;
+            Text = "Keybinds successfully updated from TextBox.";
+        })
+        if DEBUG_MODE then print("Keybinds Updated to:", keybinds) end
     end
 
+    -- **Heartbeat function for seat return (if enabled)**
+    local function startSeatReturnHeartbeat()
+        if seatAreaReturnEnabled and not seatReturnHeartbeat then
+            seatReturnHeartbeat = runService.Heartbeat:Connect(function()
+                if currentSeatPosition then
+                    local distance = (player.Character.HumanoidRootPart.Position - currentSeatPosition).Magnitude
+                    if distance > seatAreaDistanceThreshold then
+                        if DEBUG_MODE then print("SeatReturnHeartbeat: Player moved too far, returning to seat...") end
+                        player.Character:MoveTo(seatTeleportPosition) -- Return to seat area
+                    end
+                end
+            end)
+        end
+    end
 
-    -- **Function to stop Seat Return Heartbeat**
     local function stopSeatReturnHeartbeat()
         if seatReturnHeartbeat then
             seatReturnHeartbeat:Disconnect()
             seatReturnHeartbeat = nil
-            if DEBUG_MODE then print("SeatReturnHeartbeat: Stopped.") end
+            if DEBUG_MODE then print("SeatReturnHeartbeat stopped.") end
         end
     end
 
 
-    -- **Function to update Keybinds from TextBox** **[NEW Function]**
-    local function updateKeybindsFromTextBox(text)
-        local newKeybinds = {}
-        local keyCodes = string.split(text, ",")
-        local keyNames = {"toggle_invis", "toggle_fake_character", "toggle_effects", "toggle_walkspeed_boost", "hide_ui"}
-        local validKeybinds = true
-
-        if #keyCodes ~= #keyNames then
-            warn("Invalid number of keybinds entered. Please enter 5 key codes separated by commas.")
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Invalid Keybinds";
-                Duration = 2;
-                Text = "Please enter 5 key codes separated by commas (e.g., K,N,E,B,Z).";
-            })
-            return false -- Indicate invalid keybinds
-        end
-
-
-        for i, keyCodeStr in ipairs(keyCodes) do
-            local keyName = keyNames[i]
-            keyCodeStr = string.gsub(keyCodeStr, "^%s*(.-)%s*$", "%1") -- Trim whitespace
-            local keyCodeEnum = Enum.KeyCode[keyCodeStr:upper()] -- Convert to Enum.KeyCode
-            if keyCodeEnum then
-                newKeybinds[keyName] = keyCodeEnum
-            else
-                warn("Invalid KeyCode: '" .. keyCodeStr .. "'. Please use valid KeyCode names (e.g., K, N, E, B, Z).")
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "Invalid Keybind";
-                    Duration = 2;
-                    Text = "Invalid KeyCode: '" .. keyCodeStr .. "'. Please use valid KeyCode names.";
-                })
-                validKeybinds = false
-                break -- Stop processing on first invalid keybind
-            end
-        end
-
-        if validKeybinds then
-            keybinds = newKeybinds -- Update keybinds table if all are valid
-            if DEBUG_MODE then print("Keybinds updated:", keybinds) end
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Keybinds Updated";
-                Duration = 1;
-                Text = "Keybinds updated successfully!";
-            })
-            return true -- Indicate valid keybinds
-        else
-            return false -- Indicate invalid keybinds
-        end
-    end
-
-
-    -- **Function to update Keybinds Textbox Text** **[NEW Function]**
-    local function updateKeybindsTextBoxText()
-        local keybindText = ""
-        local keyNames = {"toggle_invis", "toggle_fake_character", "toggle_effects", "toggle_walkspeed_boost", "hide_ui"}
-        for i, keyName in ipairs(keyNames) do
-            keybindText = keybindText .. keybinds[keyName].Name .. (i < #keyNames and ", " or "")
-        end
-        keybindsTextBox.Text = keybindText
-    end
-
-
-    -- **Button Click & Hover Events (Event handling)**
-
-    -- Invis Button
+    -- **Button Click Events**
     invisButton.MouseButton1Click:Connect(toggleInvisibility)
-    invisButton.MouseEnter:Connect(function() tooltipLabel.Visible = true end)
-    invisButton.MouseLeave:Connect(function() tooltipLabel.Visible = false end)
+    unloadButton.MouseButton1Click:Connect(unloadUI)
+    debugButton.MouseButton1Click:Connect(function() DEBUG_MODE = not DEBUG_MODE; buttonClickSound:Play();  game.StarterGui:SetCore("SendNotification", {Title = "Debug Mode Toggled";Duration = 1; Text = "Debug mode is now " .. (DEBUG_MODE and "ON" or "OFF");}) end)
+    hideUIButton.MouseButton1Click:Connect(toggleUIHide)
+    methodButton1.MouseButton1Click:Connect(function() setMethod(1) end)
+    fakeCharacterButton.MouseButton1Click:Connect(toggleFakeCharacter)
+    keybindToggleButton.MouseButton1Click:Connect(toggleKeybinds)
+    walkSpeedBoostButton.MouseButton1Click:Connect(toggleWalkSpeedBoost)
+    noclipButton.MouseButton1Click:Connect(toggleNoClip)
+    summonUIButton.MouseButton1Click:Connect(loadInvisUI)
+    howDoesItWorkLabel.MouseButton1Click:Connect(function() game.StarterGui:SetCore("SendNotification", {Title = "How to Use";Duration = 5; Text = "Toggle features using buttons or keybinds (if enabled). Edit keybinds in textbox below. 'Seat' method teleports you to a location briefly. 'Fake Char' spawns a dummy. 'Speed Boost' increases walk speed. 'NoClip' allows walking through walls. 'Reload UI' reloads the UI.";}) end)
+    keybindsTextBox.FocusLost:Connect(updateKeybinds)
+    walkSpeedTextBox.FocusLost:Connect(function() -- Placeholder for future speed textbox logic if needed, currently handled in toggleWalkSpeedBoost
+        local speedValue = tonumber(walkSpeedTextBox.Text)
+        if not speedValue then
+            walkSpeedTextBox.Text = "50" -- Revert to default if invalid input
+            game.StarterGui:SetCore("SendNotification", {Title = "Invalid Speed"; Duration = 2; Text = "Speed value reset to default (50). Numbers only.";})
+        end
+    end)
 
-    -- Unload Button
-    unloadButton.MouseButton1Click:Connect(createUnloadUI)
+
+    -- **Tooltip Mouse Events (for each button/tooltip pair)**
+    invisButton.MouseEnter:Connect(function() tooltipLabel_invis.Visible = true end)
+    invisButton.MouseLeave:Connect(function() tooltipLabel_invis.Visible = false end)
     unloadButton.MouseEnter:Connect(function() tooltipLabel_unload.Visible = true end)
     unloadButton.MouseLeave:Connect(function() tooltipLabel_unload.Visible = false end)
-
-    -- Debug Button
-    debugButton.MouseButton1Click:Connect(function() buttonClickSound:Play(); DEBUG_MODE = not DEBUG_MODE; tooltipLabel_debug.Visible = DEBUG_MODE; print("Debug Mode toggled via button. DEBUG_MODE is now: " .. tostring(DEBUG_MODE)) end)
     debugButton.MouseEnter:Connect(function() tooltipLabel_debug.Visible = true end)
     debugButton.MouseLeave:Connect(function() tooltipLabel_debug.Visible = false end)
-
-    -- Hide UI Button
-    hideUIButton.MouseButton1Click:Connect(toggleUIHidden)
     hideUIButton.MouseEnter:Connect(function() tooltipLabel_hideUI.Visible = true end)
     hideUIButton.MouseLeave:Connect(function() tooltipLabel_hideUI.Visible = false end)
-
-    -- Method 1 Button
-    methodButton1.MouseButton1Click:Connect(function() buttonClickSound:Play(); current_method = 1; tooltipLabel_method1.Text = "Method: Seat\nTeleport to seat location and sit"; print("Method set to Seat (1)") end)
     methodButton1.MouseEnter:Connect(function() tooltipLabel_method1.Visible = true end)
     methodButton1.MouseLeave:Connect(function() tooltipLabel_method1.Visible = false end)
-
-    -- Fake Character Button
-    fakeCharacterButton.MouseButton1Click:Connect(toggleFakeCharacter)
     fakeCharacterButton.MouseEnter:Connect(function() tooltipLabel_fakeCharacter.Visible = true end)
     fakeCharacterButton.MouseLeave:Connect(function() tooltipLabel_fakeCharacter.Visible = false end)
-
-    -- Effects Button
-    -- Keybind Toggle Button
-    keybindToggleButton.MouseButton1Click:Connect(toggleKeybinds)
     keybindToggleButton.MouseEnter:Connect(function() tooltipLabel_keybindToggle.Visible = true end)
     keybindToggleButton.MouseLeave:Connect(function() tooltipLabel_keybindToggle.Visible = false end)
-
-    -- Walk Speed Boost Button
-    walkSpeedBoostButton.MouseButton1Click:Connect(toggleWalkSpeedBoost)
     walkSpeedBoostButton.MouseEnter:Connect(function() tooltipLabel_walkSpeedBoost.Visible = true end)
     walkSpeedBoostButton.MouseLeave:Connect(function() tooltipLabel_walkSpeedBoost.Visible = false end)
-
-    -- How Does It Work Button
-    howDoesItWorkLabel.MouseButton1Click:Connect(function() buttonClickSound:Play(); tooltipLabel_howDoesItWork.Visible = not tooltipLabel_howDoesItWork.Visible end)
-    howDoesItWorkLabel.MouseEnter:Connect(function() tooltipLabel_howDoesItWork.Visible = true end)
-    howDoesItWorkLabel.MouseLeave:Connect(function() tooltipLabel_howDoesItWork.Visible = false end)
-
-    -- Summon UI Button
-    summonUIButton.MouseButton1Click:Connect(function() buttonClickSound:Play();
-        if screenGui == nil then
-            summonUIButton.Visible = false
-            loadInvisUI()
-             if DEBUG_MODE then print("SummonUIButton: UI reloaded via button click.") end
-        end
-    end)
-
-    -- **Keybinds TextBox Events** **[NEW Textbox Events]**
-    keybindsTextBox.Focused:Connect(function()
-        tooltipLabel_keybindsTextBox.Visible = true
-    end)
-
-    keybindsTextBox.FocusLost:Connect(function()
-        tooltipLabel_keybindsTextBox.Visible = false
-        local text = keybindsTextBox.Text
-        if updateKeybindsFromTextBox(text) then -- If keybinds updated successfully
-             updateKeybindsTextBoxText() -- Refresh textbox text to show potentially corrected input
-             -- Update button tooltips to reflect new keybinds (if needed, in future improvements)
-        else
-            updateKeybindsTextBoxText() -- Revert textbox text to previous valid keybinds if update failed
-        end
-    end)
+    keybindsTextBox.MouseEnter:Connect(function() tooltipLabel_keybindsTextBox.Visible = true end) -- **[NEW] Keybinds Textbox Tooltip Events**
+    keybindsTextBox.MouseLeave:Connect(function() tooltipLabel_keybindsTextBox.Visible = false end)
+    walkSpeedTextBox.MouseEnter:Connect(function() tooltipLabel_walkSpeedTextBox.Visible = true end) -- **[NEW] Walk Speed Textbox Tooltip Events**
+    walkSpeedTextBox.MouseLeave:Connect(function() tooltipLabel_walkSpeedTextBox.Visible = false end)
+    noclipButton.MouseEnter:Connect(function() tooltipLabel_noclip.Visible = true end) -- **[NEW] NoClip Button Tooltip Events**
+    noclipButton.MouseLeave:Connect(function() tooltipLabel_noclip.Visible = false end)
 
 
-    -- **Keybind Handling (using UserInputService)**
+    -- **Keybind Input Handling**
     userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-        if gameProcessedEvent then return end
-        if not keybind_enabled then return end
-
-
-        if input.KeyCode == keybinds.toggle_invis then
-            toggleInvisibility()
-            if DEBUG_MODE then print("Keybind Pressed: Toggle Invis") end
-        elseif input.KeyCode == keybinds.toggle_fake_character then
-            toggleFakeCharacter()
-            if DEBUG_MODE then print("Keybind Pressed: Toggle Fake Character") end
-        elseif input.KeyCode == keybinds.toggle_effects then
-            toggleEffects()
-            if DEBUG_MODE then print("Keybind Pressed: Toggle Effects") end
-        elseif input.KeyCode == keybinds.hide_ui then
-            toggleUIHidden()
-            if DEBUG_MODE then print("Keybind Pressed: Hide UI") end
-        elseif input.KeyCode == keybinds.toggle_walkspeed_boost then
-            toggleWalkSpeedBoost()
-            if DEBUG_MODE then print("Keybind Pressed: Toggle Walk Speed Boost") end
-        elseif input.KeyCode == Enum.KeyCode.L and screenGui == nil then
-            loadInvisUI()
-            summonUIButton.Visible = false
-            if DEBUG_MODE then print("Keybind Pressed: L - UI reloaded via keybind.") end
-        end
-    end)
-
-    -- **Character Death Detection and Summon UI Logic**
-    player:GetPropertyChangedSignal("Character"):Connect(function()
-        if DEBUG_MODE then print("CharacterPropertyChangedSignal: Character changed to: ", player.Character) end
-        if player.Character == nil then
-            if DEBUG_MODE then print("CharacterPropertyChangedSignal: Character is now nil (Player Died/Respawned)") end
-            if not screenGui then
-                if DEBUG_MODE then print("CharacterPropertyChangedSignal: screenGui is nil, showing summon button.") end
-                if summonUIButton then
-                    summonUIButton.Visible = true
-                else
-                    warn("SummonUIButton is nil! UI reload on death may not work.")
-                end
-            end
-        else
-            if DEBUG_MODE then print("CharacterPropertyChangedSignal: Character respawned, hiding summon button.") end
-            if summonUIButton then
-                summonUIButton.Visible = false
+        if not gameProcessedEvent and keybind_enabled then
+            local keyCode = input.KeyCode
+            if keyCode == keybinds.toggle_invis then
+                toggleInvisibility()
+            elseif keyCode == keybinds.toggle_fake_character then
+                toggleFakeCharacter()
+            elseif keyCode == keybinds.hide_ui then
+                toggleUIHide()
+            elseif keyCode == keybinds.toggle_walkspeed_boost then
+                toggleWalkSpeedBoost()
+            elseif keyCode == keybinds.toggle_noclip then -- **[NEW - NoClip Keybind]**
+                toggleNoClip()
             end
         end
     end)
 
-    -- **Initialize Keybinds TextBox Text on UI Load** **[NEW - Initial Textbox Setup]**
-    updateKeybindsTextBoxText()
+    -- **Initial Textbox Text Setup:** Set textbox text to current keybinds at UI load
+    local initialKeybindText = ""
+    local keyNames = {"toggle_invis", "toggle_fake_character", "hide_ui", "toggle_walkspeed_boost", "toggle_noclip"}
+    for i, name in ipairs(keyNames) do
+        initialKeybindText = initialKeybindText .. keybinds[name].Name .. (i < #keyNames and "," or "")
+    end
+    keybindsTextBox.Text = initialKeybindText
 
 
+    if DEBUG_MODE then print("LoadInvisUI: UI Load complete.") end
     game.StarterGui:SetCore("SendNotification", {
-        Title = "Invis UI Enabled";
+        Title = "Invis UI Loaded";
         Duration = 2;
-        Text = "Invis Button UI and script loaded successfully!";
+        Text = "Invisibility UI loaded successfully!";
     })
 
-
-    if DEBUG_MODE then print("LoadInvisUI: UI and script loaded.") end
 end
 
 
--- **Load UI Function Call (Initial Load)**
-loadInvisUI()
+-- **Function to handle chat commands**
+game.Chat:RegisterCommand(loaderCommand, function()
+    loadInvisUI()
+end)
+
+
+if DEBUG_MODE then print("Invis Script Initialized. Use command '" .. loaderCommand .. "' to load UI.") end
+game.StarterGui:SetCore("SendNotification", {
+    Title = "Invis Script Loaded";
+    Duration = 3;
+    Text = "Type '" .. loaderCommand .. "' in chat to load the Invisibility UI.";
+})
