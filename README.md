@@ -19,6 +19,7 @@ loadstring(game:HttpGet(('https://raw.githubusercontent.com/Mohamedguguu/invisib
 
 ## 🛠️ Supported Executors
 This script is supported on the following executors:
+- **Venex** FIRE
 - **Xeno** ⚡
 - **Argon** 🔥
 - **Solara** 🌟
