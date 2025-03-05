@@ -1,4 +1,4 @@
--- Configuration Section - **[ENHANCED UI CONFIG - GREAT UI Update + NoClip + Speed Textbox]**
+-- Configuration Section - **[ENHANCED UI CONFIG - GREAT UI Update + NoClip + Speed Textbox + L-Key Load]**
 local primaryColor = Color3.fromRGB(50, 50, 50) -- Base button color
 local secondaryColor = Color3.fromRGB(75, 75, 75) -- Slightly lighter for frame/accents
 local highlightColor = Color3.fromRGB(100, 100, 100) -- Hover/selected color
@@ -62,7 +62,8 @@ local keybinds = {
     toggle_fake_character = Enum.KeyCode.N,
     toggle_walkspeed_boost = Enum.KeyCode.B,
     hide_ui = Enum.KeyCode.K,
-    toggle_noclip = Enum.KeyCode.X -- **[NEW - NoClip Keybind]**
+    toggle_noclip = Enum.KeyCode.X, -- **[NEW - NoClip Keybind]**
+    load_ui = Enum.KeyCode.L -- **[NEW - Load UI Keybind]**
 }
 
 
@@ -342,7 +343,7 @@ local function loadInvisUI()
     keybindsTextBox.AnchorPoint = Vector2.new(0, 0) -- Anchor to top left within the frame
     keybindsTextBox.Font = buttonFont
     keybindsTextBox.TextSize = buttonTextSize - 2 -- Slightly smaller textbox text
-    keybindsTextBox.PlaceholderText = "Edit Keybinds (Z,N,K,B,X)"
+    keybindsTextBox.PlaceholderText = "Edit Keybinds (Z,N,K,B,X,L)"
     keybindsTextBox.ClearTextOnFocus = false
     keybindsTextBox.BackgroundColor3 = primaryColor
     keybindsTextBox.BackgroundTransparency = 0.5
@@ -571,7 +572,7 @@ local function loadInvisUI()
     tooltipLabel_keybindsTextBox.Visible = false
     tooltipLabel_keybindsTextBox.TextXAlignment = "Center"
     tooltipLabel_keybindsTextBox.TextYAlignment = "Top"
-    tooltipLabel_keybindsTextBox.Text = "Edit Keybinds (Comma Separated)\nExample: Z,N,K,B,X"
+    tooltipLabel_keybindsTextBox.Text = "Edit Keybinds (Comma Separated)\nExample: Z,N,K,B,X,L"
     tooltipLabel_keybindsTextBox.Name = "KeybindsTextBoxTooltip"
 
     tooltipLabel_walkSpeedTextBox.Parent = screenGui -- **[NEW] Walk Speed Textbox Tooltip**
@@ -998,7 +999,7 @@ local function loadInvisUI()
         local keyCodes = string.split(keybindText, ",") -- Split by commas
 
         local newKeybinds = {}
-        local keyNames = {"toggle_invis", "toggle_fake_character", "hide_ui", "toggle_walkspeed_boost", "toggle_noclip"} -- Order MUST match input
+        local keyNames = {"toggle_invis", "toggle_fake_character", "hide_ui", "toggle_walkspeed_boost", "toggle_noclip", "load_ui"} -- Order MUST match input, include load_ui
 
         for i, keyCodeString in ipairs(keyCodes) do
             keyCodeString = string.trim(keyCodeString) -- Remove extra spaces
@@ -1010,7 +1011,7 @@ local function loadInvisUI()
                 game.StarterGui:SetCore("SendNotification", {
                     Title = "Invalid Keybind";
                     Duration = 3;
-                    Text = "Invalid key code: '" .. keyCodeString .. "' or too many/few keycodes. Using defaults (Z,N,K,B,X). Example: Z,N,K,B,X";
+                    Text = "Invalid key code: '" .. keyCodeString .. "' or too many/few keycodes. Using defaults (Z,N,K,B,X,L). Example: Z,N,K,B,X,L";
                 })
                 -- If error, revert to default keybinds and reset textbox text
                 newKeybinds = {
@@ -1018,7 +1019,8 @@ local function loadInvisUI()
                     toggle_fake_character = Enum.KeyCode.N,
                     hide_ui = Enum.KeyCode.K,
                     toggle_walkspeed_boost = Enum.KeyCode.B,
-                    toggle_noclip = Enum.KeyCode.X
+                    toggle_noclip = Enum.KeyCode.X,
+                    load_ui = Enum.KeyCode.L
                 }
                 local defaultKeybindText = ""
                 for j, name in ipairs(keyNames) do
@@ -1122,13 +1124,15 @@ local function loadInvisUI()
                 toggleWalkSpeedBoost()
             elseif keyCode == keybinds.toggle_noclip then -- **[NEW - NoClip Keybind]**
                 toggleNoClip()
+            elseif keyCode == keybinds.load_ui then -- **[NEW - Load UI Keybind]**
+                loadInvisUI()
             end
         end
     end)
 
     -- **Initial Textbox Text Setup:** Set textbox text to current keybinds at UI load
     local initialKeybindText = ""
-    local keyNames = {"toggle_invis", "toggle_fake_character", "hide_ui", "toggle_walkspeed_boost", "toggle_noclip"}
+    local keyNames = {"toggle_invis", "toggle_fake_character", "hide_ui", "toggle_walkspeed_boost", "toggle_noclip", "load_ui"} -- Include load_ui in keynames
     for i, name in ipairs(keyNames) do
         initialKeybindText = initialKeybindText .. keybinds[name].Name .. (i < #keyNames and "," or "")
     end
@@ -1145,15 +1149,18 @@ local function loadInvisUI()
 end
 
 
--- **Function to handle chat commands**
-game.Chat:RegisterCommand(loaderCommand, function()
-    loadInvisUI()
+-- **Load UI on L Key Press Directly**
+userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if not gameProcessedEvent and input.KeyCode == keybinds.load_ui then
+        loadInvisUI()
+    end
 end)
 
 
-if DEBUG_MODE then print("Invis Script Initialized. Use command '" .. loaderCommand .. "' to load UI.") end
+if DEBUG_MODE then print("Invis Script Initialized. Press 'L' to load UI.") end -- Updated message!
 game.StarterGui:SetCore("SendNotification", {
     Title = "Invis Script Loaded";
     Duration = 3;
-    Text = "Type '" .. loaderCommand .. "' in chat to load the Invisibility UI.";
+    Text = "Press 'L' to load the Invisibility UI."; -- Updated message!
 })
+```
