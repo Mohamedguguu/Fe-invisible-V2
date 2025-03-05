@@ -1,7 +1,11 @@
--- Configuration Section - **[ENHANCED UI CONFIG - GREAT UI Update + NoClip + Speed Textbox + L-Key Load]**
+-- Configuration Section - **[ENHANCED UI CONFIG - GREAT UI Update + NoClip + Speed Textbox + L-Key Load + v1.1 + More Features]**
+local scriptVersion = "v1.1" -- **[NEW] Version Number**
+
 local primaryColor = Color3.fromRGB(50, 50, 50) -- Base button color
 local secondaryColor = Color3.fromRGB(75, 75, 75) -- Slightly lighter for frame/accents
 local highlightColor = Color3.fromRGB(100, 100, 100) -- Hover/selected color
+local adminColor = Color3.fromRGB(120, 90, 90) -- **[NEW] Color for Admin Buttons**
+local adminFrameColor = Color3.fromRGB(85, 65, 65) -- **[NEW] Color for Admin Frame**
 local textColor = Color3.White
 local cornerRadius = UDim.new(0.1, 0) -- Consistent corner radius
 
@@ -16,7 +20,7 @@ local framePaddingX = 15 -- Padding inside the frame
 local framePaddingY = 15
 local buttonsPerRow = 3 -- How many buttons per row before wrapping
 
-local buttonsFrameSize = UDim2.new(0, (buttonSize.X.Offset + buttonSpacingX) * buttonsPerRow + 2 * framePaddingX - buttonSpacingX, 0, 300) -- Adjust frame size dynamically, increased height for new features
+local buttonsFrameSize = UDim2.new(0, (buttonSize.X.Offset + buttonSpacingX) * buttonsPerRow + 2 * framePaddingX - buttonSpacingX, 0, 350) -- **[ADJUSTED HEIGHT]** Increased frame height for new features
 local buttonsFramePosition = UDim2.new(1, -320, 0, 10) -- Adjust frame position if needed
 
 local hideUIButtonPosition = UDim2.new(0, framePaddingX, 0, framePaddingY) -- First button position in frame
@@ -24,12 +28,18 @@ local unloadButtonPosition = UDim2.new(0, hideUIButtonPosition.X.Offset + button
 local debugButtonPosition = UDim2.new(0, unloadButtonPosition.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0, framePaddingY) -- Position next to unload button
 local invisButtonPosition = UDim2.new(0, framePaddingX, 0, hideUIButtonPosition.Y.Offset + buttonSize.Y.Offset + buttonSpacingY) -- New row
 local methodButton1Position = UDim2.new(0, invisButtonPosition.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0, invisButtonPosition.Y.Offset)
-local fakeCharacterButtonPosition =  UDim2.new(0, methodButton1Position.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0, methodButton1Position.Y.Offset)
-local keybindToggleButtonPosition = UDim2.new(0, framePaddingX, 0, invisButtonPosition.Y.Offset + (2 * (buttonSize.Y.Offset + buttonSpacingY))) -- Deeper new row
+local methodButton2Position = UDim2.new(0, methodButton1Position.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0, methodButton1Position.Y.Offset) -- **[NEW] Method 2 Button Position**
+local fakeCharacterButtonPosition =  UDim2.new(0, framePaddingX, 0, methodButton1Position.Y.Offset + buttonSize.Y.Offset + buttonSpacingY) -- New Row
+local keybindToggleButtonPosition = UDim2.new(0, fakeCharacterButtonPosition.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0, fakeCharacterButtonPosition.Y.Offset)
 local walkSpeedBoostButtonPosition = UDim2.new(0, keybindToggleButtonPosition.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0,  keybindToggleButtonPosition.Y.Offset)
-local noclipButtonPosition = UDim2.new(0, walkSpeedBoostButtonPosition.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0, walkSpeedBoostButtonPosition.Y.Offset)
-local keybindsTextBoxPosition = UDim2.new(0, framePaddingX, 0, walkSpeedBoostButtonPosition.Y.Offset + buttonSize.Y.Offset + buttonSpacingY + 10) -- Below speed boost
-local walkSpeedTextBoxPosition = UDim2.new(0, walkSpeedBoostButtonPosition.X.Offset, 0, walkSpeedBoostButtonPosition.Y.Offset + buttonSize.Y.Offset + buttonSpacingY) -- Below Speed Boost Button
+local noclipButtonPosition = UDim2.new(0, framePaddingX, 0, fakeCharacterButtonPosition.Y.Offset + buttonSize.Y.Offset + buttonSpacingY) -- New Row
+local keybindsTextBoxPosition = UDim2.new(0, noclipButtonPosition.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0, noclipButtonPosition.Y.Offset)
+local walkSpeedTextBoxPosition = UDim2.new(0, keybindsTextBoxPosition.X.Offset + buttonSize.X.Offset + buttonSpacingX, 0, walkSpeedTextBoxPosition.Y.Offset) -- Adjusted
+
+
+local adminFramePosition = UDim2.new(0, framePaddingX, 0, noclipButtonPosition.Y.Offset + (2 * (buttonSize.Y.Offset + buttonSpacingY))) -- **[NEW] Admin Frame Position, deeper new row**
+local adminFrameSize = UDim2.new(0, buttonsFrameSize.X.Offset - (2*framePaddingX), 0, 50) -- **[NEW] Admin Frame Size**
+local serverInvisButtonPosition = UDim2.new(0, framePaddingX, 0, framePaddingY) -- **[NEW] Server Invis Button position inside Admin Frame**
 
 
 local moreWillComeLabelYOffset = 15 -- Closer to the bottom
@@ -49,9 +59,11 @@ local fake_character_enabled = false
 local keybind_enabled = true
 local walkspeed_boost_enabled = false
 local noclip_enabled = false -- Feature toggle
+local server_invis_enabled = false -- **[NEW] Server Invis Toggle**
 local originalCharacterColor = nil
 local fakeCharacterModel = nil
 local seatTeleportPosition = Vector3.new(-25.95, 84, 3537.55)
+local seatTeleportPositionMethod2 = Vector3.new(-25.95, 84, 3547.55) -- **[NEW] Method 2 Position**
 local currentSeatPosition = nil
 local seatReturnHeartbeat = nil
 
@@ -63,7 +75,8 @@ local keybinds = {
     toggle_walkspeed_boost = Enum.KeyCode.B,
     hide_ui = Enum.KeyCode.K,
     toggle_noclip = Enum.KeyCode.X, -- **[NEW - NoClip Keybind]**
-    load_ui = Enum.KeyCode.L -- **[NEW - Load UI Keybind]**
+    load_ui = Enum.KeyCode.L, -- **[NEW - Load UI Keybind]**
+    switch_method = Enum.KeyCode.M -- **[NEW] Switch Method Keybind**
 }
 
 
@@ -87,7 +100,7 @@ local function loadInvisUI()
 
 
     game.StarterGui:SetCore("SendNotification", {
-        Title = "Loading Invis UI";
+        Title = "Loading Invis UI " .. scriptVersion; -- **[NEW] Version in Load Notification**
         Duration = 2;
         Text = "Creating and initializing UI elements...";
     })
@@ -103,6 +116,7 @@ local function loadInvisUI()
     local unloadButton = Instance.new("TextButton")
     local debugButton = Instance.new("TextButton")
     local methodButton1 = Instance.new("TextButton")
+    local methodButton2 = Instance.new("TextButton") -- **[NEW] Method 2 Button**
     local hideUIButton = Instance.new("TextButton")
     local fakeCharacterButton = Instance.new("TextButton")
     local howDoesItWorkLabel = Instance.new("TextButton")
@@ -114,12 +128,16 @@ local function loadInvisUI()
     local walkSpeedTextBox = Instance.new("TextBox") -- **[NEW] Walk Speed Textbox**
     local noclipButton = Instance.new("TextButton") -- **[NEW] NoClip Button**
 
+    local adminFrame = Instance.new("Frame") -- **[NEW] Admin Frame**
+    local serverInvisButton = Instance.new("TextButton") -- **[NEW] Server Invis Button**
+
 
     local uicorner_frame = Instance.new("UICorner")
     local uicorner_invis = Instance.new("UICorner")
     local uicorner_unload = Instance.new("UICorner")
     local uicorner_debug = Instance.new("UICorner")
     local uicorner_method1 = Instance.new("UICorner")
+    local uicorner_method2 = Instance.new("UICorner") -- **[NEW] Method 2 UICorner**
     local uicorner_hideUI = Instance.new("UICorner")
     local uicorner_fakeCharacter = Instance.new("UICorner")
     local uicorner_keybindToggle = Instance.new("UICorner")
@@ -128,12 +146,15 @@ local function loadInvisUI()
     local uicorner_keybindsTextBox = Instance.new("UICorner") -- **[NEW] Keybinds TextBox UICorner**
     local uicorner_walkSpeedTextBox = Instance.new("UICorner") -- **[NEW] Walk Speed Textbox UICorner**
     local uicorner_noclip = Instance.new("UICorner") -- **[NEW] NoClip Button UICorner**
+    local uicorner_adminFrame = Instance.new("UICorner") -- **[NEW] Admin Frame UICorner**
+    local uicorner_serverInvis = Instance.new("UICorner") -- **[NEW] Server Invis Button UICorner**
 
 
     local tooltipLabel_invis = Instance.new("TextLabel")
     local tooltipLabel_unload = Instance.new("TextLabel")
     local tooltipLabel_debug = Instance.new("TextLabel")
     local tooltipLabel_method1 = Instance.new("TextLabel")
+    local tooltipLabel_method2 = Instance.new("TextLabel") -- **[NEW] Method 2 Tooltip**
     local tooltipLabel_hideUI = Instance.new("TextLabel")
     local tooltipLabel_fakeCharacter = Instance.new("TextLabel")
     local tooltipLabel_howDoesItWork = Instance.new("TextLabel")
@@ -142,6 +163,7 @@ local function loadInvisUI()
     local tooltipLabel_keybindsTextBox = Instance.new("TextLabel") -- **[NEW] Keybinds TextBox Tooltip**
     local tooltipLabel_walkSpeedTextBox = Instance.new("TextLabel") -- **[NEW] Walk Speed Textbox Tooltip**
     local tooltipLabel_noclip = Instance.new("TextLabel") -- **[NEW] NoClip Button Tooltip**
+    local tooltipLabel_serverInvis = Instance.new("TextLabel") -- **[NEW] Server Invis Button Tooltip**
 
 
     -- **Button Click Sound Setup**
@@ -168,6 +190,19 @@ local function loadInvisUI()
 
     uicorner_frame.Parent = buttonsFrame
     uicorner_frame.CornerRadius = cornerRadius
+
+    -- **Admin Frame Properties** **[NEW Admin Frame Properties]**
+    adminFrame.Parent = buttonsFrame
+    adminFrame.Size = adminFrameSize
+    adminFrame.Position = adminFramePosition
+    adminFrame.BackgroundColor3 = adminFrameColor -- Use admin frame color
+    adminFrame.BackgroundTransparency = 0.7 -- Slightly more transparent
+    adminFrame.BorderSizePixel = 0
+    adminFrame.Name = "AdminFrame"
+    adminFrame.ClipsDescendants = true
+
+    uicorner_adminFrame.Parent = adminFrame
+    uicorner_adminFrame.CornerRadius = cornerRadius
 
 
     -- **Hide UI Button Properties**
@@ -248,7 +283,7 @@ local function loadInvisUI()
     methodButton1.Size = buttonSize
     methodButton1.Position = methodButton1Position -- Position in the next column
     methodButton1.Font = buttonFont
-    methodButton1.Text = "Method: Seat"
+    methodButton1.Text = "Method 1: Seat" -- **[UPDATED TEXT]**
     methodButton1.BackgroundColor3 = primaryColor
     methodButton1.BackgroundTransparency = 0.5
     methodButton1.BorderSizePixel = 0
@@ -261,11 +296,29 @@ local function loadInvisUI()
     uicorner_method1.Parent = methodButton1
     uicorner_method1.CornerRadius = cornerRadius
 
+    -- **Method 2 Button (Box) Properties** **[NEW Method 2 Button]**
+    methodButton2.Parent = buttonsFrame
+    methodButton2.Size = buttonSize
+    methodButton2.Position = methodButton2Position -- Position in the next column
+    methodButton2.Font = buttonFont
+    methodButton2.Text = "Method 2: Box" -- **[NEW TEXT]**
+    methodButton2.BackgroundColor3 = primaryColor
+    methodButton2.BackgroundTransparency = 0.5
+    methodButton2.BorderSizePixel = 0
+    methodButton2.Name = "MethodButton2"
+    methodButton2.AutoButtonColor = false
+    methodButton2.ClipsDescendants = true
+    methodButton2.TextSize = buttonTextSize
+    methodButton2.TextColor3 = textColor
+
+    uicorner_method2.Parent = methodButton2
+    uicorner_method2.CornerRadius = cornerRadius
+
 
     -- **Fake Character Button Properties**
     fakeCharacterButton.Parent = buttonsFrame
     fakeCharacterButton.Size = buttonSize
-    fakeCharacterButton.Position = fakeCharacterButtonPosition -- Position in the next column
+    fakeCharacterButton.Position = fakeCharacterButtonPosition -- Position in the next row
     fakeCharacterButton.Font = buttonFont
     fakeCharacterButton.Text = "Fake Char: Off" -- More descriptive text
     fakeCharacterButton.BackgroundColor3 = primaryColor
@@ -284,7 +337,7 @@ local function loadInvisUI()
     -- **Keybind Toggle Button Properties**
     keybindToggleButton.Parent = buttonsFrame
     keybindToggleButton.Size = buttonSize
-    keybindToggleButton.Position = keybindToggleButtonPosition -- Deeper New Row, First Column
+    keybindToggleButton.Position = keybindToggleButtonPosition -- Same row
     keybindToggleButton.Font = buttonFont
     keybindToggleButton.Text = "Keybinds: On" -- Assuming default is on, adjust text later in logic
     keybindToggleButton.BackgroundColor3 = primaryColor
@@ -302,7 +355,7 @@ local function loadInvisUI()
     -- **Walk Speed Boost Button Properties**
     walkSpeedBoostButton.Parent = buttonsFrame
     walkSpeedBoostButton.Size = buttonSize
-    walkSpeedBoostButton.Position = walkSpeedBoostButtonPosition -- New Row, Second Column
+    walkSpeedBoostButton.Position = walkSpeedBoostButtonPosition -- Same row
     walkSpeedBoostButton.Font = buttonFont
     walkSpeedBoostButton.Text = "Speed Boost: Off"
     walkSpeedBoostButton.BackgroundColor3 = primaryColor
@@ -320,7 +373,7 @@ local function loadInvisUI()
     -- **NoClip Button Properties** **[NEW - NoClip Button]**
     noclipButton.Parent = buttonsFrame
     noclipButton.Size = buttonSize
-    noclipButton.Position = noclipButtonPosition
+    noclipButton.Position = noclipButtonPosition -- New Row
     noclipButton.Font = buttonFont
     noclipButton.Text = "NoClip: Off"
     noclipButton.BackgroundColor3 = primaryColor
@@ -338,12 +391,12 @@ local function loadInvisUI()
 
     -- **Keybinds TextBox Properties** **[NEW Textbox Properties]**
     keybindsTextBox.Parent = buttonsFrame
-    keybindsTextBox.Size =  UDim2.new(0, buttonsFrameSize.X.Offset - 2 * framePaddingX, 0, 30) -- Textbox width matches frame width minus padding
+    keybindsTextBox.Size =  UDim2.new(0, (buttonsFrameSize.X.Offset / 2) - framePaddingX - (buttonSpacingX / 2), 0, 30) -- **[ADJUSTED SIZE & POSITION]**  Half width of frame
     keybindsTextBox.Position = keybindsTextBoxPosition
     keybindsTextBox.AnchorPoint = Vector2.new(0, 0) -- Anchor to top left within the frame
     keybindsTextBox.Font = buttonFont
     keybindsTextBox.TextSize = buttonTextSize - 2 -- Slightly smaller textbox text
-    keybindsTextBox.PlaceholderText = "Edit Keybinds (Z,N,K,B,X,L)"
+    keybindsTextBox.PlaceholderText = "Edit Keybinds (Z,N,K,B,X,M,L)" -- **[UPDATED PLACEHOLDER]**
     keybindsTextBox.ClearTextOnFocus = false
     keybindsTextBox.BackgroundColor3 = primaryColor
     keybindsTextBox.BackgroundTransparency = 0.5
@@ -357,8 +410,8 @@ local function loadInvisUI()
 
     -- **Walk Speed Textbox Properties** **[NEW Textbox for Speed]**
     walkSpeedTextBox.Parent = buttonsFrame
-    walkSpeedTextBox.Size = UDim2.new(0, buttonSize.X.Offset, 0, 30) -- Same width as button
-    walkSpeedTextBox.Position = walkSpeedTextBoxPosition -- Below Speed Boost Button
+    walkSpeedTextBox.Size = UDim2.new(0, (buttonsFrameSize.X.Offset / 2) - framePaddingX - (buttonSpacingX / 2), 0, 30) -- **[ADJUSTED SIZE & POSITION]** Half width of frame
+    walkSpeedTextBox.Position = walkSpeedTextBoxPosition -- Adjusted Position - next to keybinds textbox
     walkSpeedTextBox.AnchorPoint = Vector2.new(0, 0)
     walkSpeedTextBox.Font = buttonFont
     walkSpeedTextBox.TextSize = buttonTextSize - 2
@@ -376,11 +429,29 @@ local function loadInvisUI()
     uicorner_walkSpeedTextBox.Parent = walkSpeedTextBox
     uicorner_walkSpeedTextBox.CornerRadius = cornerRadius
 
+    -- **Server Invis Button Properties** **[NEW Admin Button]**
+    serverInvisButton.Parent = adminFrame -- Parented to Admin Frame!
+    serverInvisButton.Size = buttonSize
+    serverInvisButton.Position = serverInvisButtonPosition -- Position within admin frame
+    serverInvisButton.Font = buttonFont
+    serverInvisButton.Text = "Server Invis: Off" -- **[NEW TEXT]**
+    serverInvisButton.BackgroundColor3 = adminColor -- **[NEW ADMIN COLOR]**
+    serverInvisButton.BackgroundTransparency = 0.5
+    serverInvisButton.BorderSizePixel = 0
+    serverInvisButton.Name = "ServerInvisButton"
+    serverInvisButton.AutoButtonColor = false
+    serverInvisButton.ClipsDescendants = true
+    serverInvisButton.TextSize = buttonTextSize
+    serverInvisButton.TextColor3 = textColor
+
+    uicorner_serverInvis.Parent = serverInvisButton
+    uicorner_serverInvis.CornerRadius = cornerRadius
+
 
     -- **Summon UI Button Properties**
     summonUIButton.Parent = screenGui
     summonUIButton.Size = summonUIButtonSize
-    summonUIButton.Position = UDim2.new(0.5, 0, 0.85, 0) -- Move Summon button lower and closer to center
+    summonUIButton.Position = UDim2.new(0.5, 0, 0.90, 0) -- Move Summon button lower and closer to center **[ADJUSTED POSITION]**
     summonUIButton.AnchorPoint = Vector2.new(0.5, 0.5)
     summonUIButton.Font = buttonFont
     summonUIButton.Text = "Reload UI" -- Shortened Text
@@ -506,12 +577,27 @@ local function loadInvisUI()
     tooltipLabel_method1.Font = buttonFont
     tooltipLabel_method1.TextSize = tooltipTextSize
     tooltipLabel_method1.Position = UDim2.new(1, buttonsFramePosition.X.Offset + methodButton1.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + methodButton1.Position.Y.Offset + buttonSize.Y.Offset + 5)
-    tooltipLabel_method1.Size = UDim2.new(0, 200, 0, 40)
+    tooltipLabel_method1.Size = UDim2.new(0, 220, 0, 40) -- **[ADJUSTED WIDTH]**
     tooltipLabel_method1.Visible = false
     tooltipLabel_method1.TextXAlignment = "Center"
     tooltipLabel_method1.TextYAlignment = "Top"
-    tooltipLabel_method1.Text = "Invisibility Method:\nSeat Teleport"
+    tooltipLabel_method1.Text = "Invisibility Method 1:\nSeat Teleport (Keybind: M to switch)" -- **[UPDATED TEXT]**
     tooltipLabel_method1.Name = "Method1Tooltip"
+
+    tooltipLabel_method2.Parent = screenGui -- **[NEW] Method 2 Tooltip**
+    tooltipLabel_method2.BackgroundTransparency = 1
+    tooltipLabel_method2.TextColor3 = textColor
+    tooltipLabel_method2.TextStrokeColor3 = Color3.Black
+    tooltipLabel_method2.TextStrokeTransparency = 0.5
+    tooltipLabel_method2.Font = buttonFont
+    tooltipLabel_method2.TextSize = tooltipTextSize
+    tooltipLabel_method2.Position = UDim2.new(1, buttonsFramePosition.X.Offset + methodButton2.Position.X.Offset, 0, buttonsFramePosition.Y.Offset + methodButton2.Position.Y.Offset + buttonSize.Y.Offset + 5)
+    tooltipLabel_method2.Size = UDim2.new(0, 220, 0, 40) -- **[ADJUSTED WIDTH]**
+    tooltipLabel_method2.Visible = false
+    tooltipLabel_method2.TextXAlignment = "Center"
+    tooltipLabel_method2.TextYAlignment = "Top"
+    tooltipLabel_method2.Text = "Invisibility Method 2:\nBox Method (Keybind: M to switch)" -- **[NEW TEXT]**
+    tooltipLabel_method2.Name = "Method2Tooltip"
 
 
     tooltipLabel_fakeCharacter.Parent = screenGui
@@ -572,7 +658,7 @@ local function loadInvisUI()
     tooltipLabel_keybindsTextBox.Visible = false
     tooltipLabel_keybindsTextBox.TextXAlignment = "Center"
     tooltipLabel_keybindsTextBox.TextYAlignment = "Top"
-    tooltipLabel_keybindsTextBox.Text = "Edit Keybinds (Comma Separated)\nExample: Z,N,K,B,X,L"
+    tooltipLabel_keybindsTextBox.Text = "Edit Keybinds (Comma Separated)\nExample: Z,N,K,B,X,M,L" -- **[UPDATED EXAMPLE]**
     tooltipLabel_keybindsTextBox.Name = "KeybindsTextBoxTooltip"
 
     tooltipLabel_walkSpeedTextBox.Parent = screenGui -- **[NEW] Walk Speed Textbox Tooltip**
@@ -605,6 +691,20 @@ local function loadInvisUI()
     tooltipLabel_noclip.Text = "Toggle NoClip Mode\n(Keybind: X)"
     tooltipLabel_noclip.Name = "NoClipTooltip"
 
+    tooltipLabel_serverInvis.Parent = screenGui -- **[NEW] Server Invis Button Tooltip**
+    tooltipLabel_serverInvis.BackgroundTransparency = 1
+    tooltipLabel_serverInvis.TextColor3 = textColor
+    tooltipLabel_serverInvis.TextStrokeColor3 = Color3.Black
+    tooltipLabel_serverInvis.TextStrokeTransparency = 0.5
+    tooltipLabel_serverInvis.Font = buttonFont
+    tooltipLabel_serverInvis.TextSize = tooltipTextSize
+    tooltipLabel_serverInvis.Position = UDim2.new(0, adminFramePosition.X.Offset + serverInvisButton.Position.X.Offset, 0, adminFramePosition.Position.Y.Offset + serverInvisButton.Position.Y.Offset + buttonSize.Y.Offset + 5) -- Position below Server Invis button
+    tooltipLabel_serverInvis.Size = UDim2.new(0, 200, 0, 40)
+    tooltipLabel_serverInvis.Visible = false
+    tooltipLabel_serverInvis.TextXAlignment = "Center"
+    tooltipLabel_serverInvis.TextYAlignment = "Top"
+    tooltipLabel_serverInvis.Text = "Toggle Server-Wide Invisibility\n(Admin Feature - No Functionality Yet)" -- **[NEW TEXT]**
+    tooltipLabel_serverInvis.Name = "ServerInvisTooltip"
 
 
     -- **Function to set character transparency**
@@ -632,7 +732,9 @@ local function loadInvisUI()
             if current_method == 1 then -- Method 1: Seat
                 setCharacterTransparency(0.5)
                 invisButton.Text = "Invis: On" -- Text Update!
-                tooltipLabel_invis.Text = "Invisibility Enabled\n(Current Method: Seat, Keybind: Z)" -- Tooltip Update!
+                tooltipLabel_invis.Text = "Invisibility Enabled\n(Method 1: Seat, Keybind: Z)" -- Tooltip Update!
+                tooltipLabel_method1.Text = "Invisibility Method 1:\nSeat Teleport (Active Method, Keybind: M to switch)" -- **[UPDATED TOOLTIP]**
+                tooltipLabel_method2.Text = "Invisibility Method 2:\nBox Method (Keybind: M to switch)" -- **[UPDATED TOOLTIP]**
 
                 local character = player.Character
                 if character then
@@ -663,7 +765,7 @@ local function loadInvisUI()
                             game.StarterGui:SetCore("SendNotification", {
                                 Title = "Invis Enabled (Seat)";
                                 Duration = 1;
-                                Text = "Method: Seat - Character semi-transparent & teleported to seat";
+                                Text = "Method 1: Seat - Character semi-transparent & teleported to seat";
                             })
                         else
                             warn("Torso or UpperTorso not found for welding Seat!")
@@ -673,7 +775,7 @@ local function loadInvisUI()
                             game.StarterGui:SetCore("SendNotification", {
                                 Title = "Invis Enabled (Seat - No Torso)";
                                 Duration = 1;
-                                Text = "Method: Seat - Character semi-transparent, but Torso missing for seat.";
+                                Text = "Method 1: Seat - Character semi-transparent, but Torso missing for seat.";
                             })
                             warn("HumanoidRootPart not found for LocalPlayer's Character!")
                             currentSeatPosition = nil
@@ -681,7 +783,7 @@ local function loadInvisUI()
                             game.StarterGui:SetCore("SendNotification", {
                                 Title = "Invis Enabled (Seat - No RootPart)";
                                 Duration = 1;
-                                Text = "Method: Seat - Character semi-transparent, but teleport failed (no RootPart).";
+                                Text = "Method 1: Seat - Character semi-transparent, but teleport failed (no RootPart).";
                             })
                         end
                     else
@@ -691,18 +793,67 @@ local function loadInvisUI()
                         game.StarterGui:SetCore("SendNotification", {
                             Title = "Invis Enabled (Seat - Failed)";
                             Duration = 1;
-                            Text = "Method: Seat - Invisibility ON failed. Character not found.";
+                            Text = "Method 1: Seat - Invisibility ON failed. Character not found.";
                         })
                     end
                 end
-            end
+            elseif current_method == 2 then -- Method 2: Box **[NEW Method 2 Logic]**
+                setCharacterTransparency(0.3) -- Slightly more transparent for box method
+                invisButton.Text = "Invis: On"
+                tooltipLabel_invis.Text = "Invisibility Enabled\n(Method 2: Box, Keybind: Z)" -- Tooltip Update!
+                tooltipLabel_method1.Text = "Invisibility Method 1:\nSeat Teleport (Keybind: M to switch)" -- **[UPDATED TOOLTIP]**
+                tooltipLabel_method2.Text = "Invisibility Method 2:\nBox Method (Active Method, Keybind: M to switch)" -- **[UPDATED TOOLTIP]**
 
+
+                local character = player.Character
+                if character then
+                    if DEBUG_MODE then print("toggleInvisibility: Character found: ", character.Name) end
+                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                    if humanoidRootPart then
+                        if DEBUG_MODE then print("toggleInvisibility: HumanoidRootPart found: ", humanoidRootPart.Name) end
+                        local savedpos = humanoidRootPart.CFrame
+                        wait()
+                        character:MoveTo(seatTeleportPositionMethod2) -- **[NEW Method 2 Teleport]**
+                        wait(0.05)
+                        local InvisBoxMethod2 = Instance.new('Part', game.Workspace) -- **[NEW Box Part]**
+                        InvisBoxMethod2.Anchored = true
+                        InvisBoxMethod2.CanCollide = false
+                        InvisBoxMethod2.Name = 'InvisBoxMethod2'
+                        InvisBoxMethod2.Transparency = 0.8 -- Box more transparent
+                        InvisBoxMethod2.BrickColor = BrickColor.Blue() -- Different Color Box
+                        InvisBoxMethod2.Size = Vector3.new(3,4,3) -- Slightly bigger box
+                        InvisBoxMethod2.CFrame = CFrame.new(seatTeleportPositionMethod2) -- **[NEW Method 2 Teleport]**
+
+                        wait()
+                        InvisBoxMethod2.CFrame = savedpos * CFrame.new(0, -2, 0) -- Position box at player's feet
+
+
+                        game.StarterGui:SetCore("SendNotification", {
+                            Title = "Invis Enabled (Box)";
+                            Duration = 1;
+                            Text = "Method 2: Box - Character transparent & inside a box.";
+                        })
+                    else
+                        warn("HumanoidRootPart not found for LocalPlayer's Character! (Box Method)")
+                        game.StarterGui:SetCore("SendNotification", {
+                            Title = "Invis Enabled (Box - No RootPart)";
+                            Duration = 1;
+                            Text = "Method 2: Box - Character semi-transparent, but box failed (no RootPart).";
+                        })
+                    end
+                end
+
+
+            end
 
 
         else -- Invis Off (Cleanup)
             setCharacterTransparency(0)
             invisButton.Text = "Invis: Off" -- Text Update!
-            tooltipLabel_invis.Text = "Toggle Invisibility\n(Current Method: Seat, Keybind: Z)" -- Tooltip Update!
+            tooltipLabel_invis.Text = "Toggle Invisibility\n(Current Method: " .. (current_method == 1 and "Seat" or "Box") .. ", Keybind: Z)" -- Tooltip Update! **[DYNAMIC TOOLTIP]**
+            tooltipLabel_method1.Text = "Invisibility Method 1:\nSeat Teleport (Keybind: M to switch)" -- **[RESET TOOLTIP]**
+            tooltipLabel_method2.Text = "Invisibility Method 2:\nBox Method (Keybind: M to switch)" -- **[RESET TOOLTIP]**
+
 
             if workspace:FindFirstChild('invischair') then
                 workspace:FindFirstChild('invischair'):Destroy()
@@ -896,6 +1047,39 @@ local function loadInvisUI()
         end
     end
 
+    -- **Function to toggle Server Invisibility** **[NEW Admin Feature]**
+    local function toggleServerInvisibility()
+        buttonClickSound:Play()
+        server_invis_enabled = not server_invis_enabled
+
+        if DEBUG_MODE then
+            print("Toggling Server Invisibility - server_invis_enabled is now: " .. tostring(server_invis_enabled))
+        end
+
+        if server_invis_enabled then
+            serverInvisButton.Text = "Server Invis: On" -- **[UPDATED TEXT]**
+            serverInvisButton.BackgroundColor3 = highlightColor -- **[HIGHLIGHT ADMIN BUTTON]**
+            tooltipLabel_serverInvis.Text = "Toggle Server-Wide Invisibility\nServer Invisibility is Enabled\n(Admin Feature - No Functionality Yet)" -- **[UPDATED TOOLTIP]**
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Server Invis Enabled";
+                Duration = 1;
+                Text = "**ADMIN FEATURE** - Server-wide invisibility enabled (no function yet)."; -- **[ADMIN NOTIFICATION]**
+            })
+            -- **[SERVER-SIDE INVISIBILITY LOGIC WOULD GO HERE - NOT IMPLEMENTED IN THIS CLIENT-SIDE SCRIPT]**
+
+        else
+            serverInvisButton.Text = "Server Invis: Off" -- **[UPDATED TEXT]**
+            serverInvisButton.BackgroundColor3 = adminColor -- **[RESET ADMIN BUTTON COLOR]**
+            tooltipLabel_serverInvis.Text = "Toggle Server-Wide Invisibility\nServer Invisibility is Disabled\n(Admin Feature - No Functionality Yet)" -- **[UPDATED TOOLTIP]**
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Server Invis Disabled";
+                Duration = 1;
+                Text = "**ADMIN FEATURE** - Server-wide invisibility disabled (no function yet)."; -- **[ADMIN NOTIFICATION]**
+            })
+            -- **[SERVER-SIDE INVISIBILITY LOGIC WOULD GO HERE - NOT IMPLEMENTED IN THIS CLIENT-SIDE SCRIPT]**
+        end
+    end
+
 
     -- **Function to Hide/Show UI**
     local function toggleUIHide()
@@ -940,11 +1124,16 @@ local function loadInvisUI()
             keybind_enabled = true -- Reset keybind state to default ON
             walkspeed_boost_enabled = false -- Reset speed boost to default OFF
             noclip_enabled = false -- Reset noclip to default OFF
+            server_invis_enabled = false -- **[NEW] Reset server invis state**
 
 
             -- Reset Button Texts and Tooltips to defaults
             invisButton.Text = "Invis: Off"
-            tooltipLabel_invis.Text = "Toggle Invisibility\n(Current Method: Seat, Keybind: Z)"
+            tooltipLabel_invis.Text = "Toggle Invisibility\n(Current Method: " .. (current_method == 1 and "Seat" or "Box") .. ", Keybind: Z)"
+            methodButton1.Text = "Method 1: Seat" -- **[RESET METHOD BUTTON TEXT]**
+            methodButton2.Text = "Method 2: Box" -- **[RESET METHOD BUTTON TEXT]**
+            tooltipLabel_method1.Text = "Invisibility Method 1:\nSeat Teleport (Keybind: M to switch)" -- **[RESET METHOD TOOLTIP]**
+            tooltipLabel_method2.Text = "Invisibility Method 2:\nBox Method (Keybind: M to switch)" -- **[RESET METHOD TOOLTIP]**
             fakeCharacterButton.Text = "Fake Char: Off"
             tooltipLabel_fakeCharacter.Text = "Toggle Fake Character\n(Keybind: N)"
             keybindToggleButton.Text = "Keybinds: On"
@@ -955,6 +1144,9 @@ local function loadInvisUI()
             tooltipLabel_noclip.Text = "Toggle NoClip Mode\n(Keybind: X)"
             hideUIButton.Text = "Hide UI"
             tooltipLabel_hideUI.Text = "Hide/Show UI\n(Keybind: K)"
+            serverInvisButton.Text = "Server Invis: Off" -- **[RESET ADMIN BUTTON TEXT]**
+            serverInvisButton.BackgroundColor3 = adminColor -- **[RESET ADMIN BUTTON COLOR]**
+            tooltipLabel_serverInvis.Text = "Toggle Server-Wide Invisibility\n(Admin Feature - No Functionality Yet)" -- **[RESET ADMIN TOOLTIP]**
 
 
             game.StarterGui:SetCore("SendNotification", {
@@ -983,12 +1175,24 @@ local function loadInvisUI()
         end
 
         if methodNumber == 1 then
-            methodButton1.Text = "Method: Seat"
-            tooltipLabel_method1.Text = "Invisibility Method:\nSeat Teleport"
+            methodButton1.Text = "Method 1: Seat" -- **[UPDATED TEXT]**
+            methodButton2.Text = "Method 2: Box" -- **[UPDATED TEXT]**
+            tooltipLabel_method1.Text = "Invisibility Method 1:\nSeat Teleport (Active Method, Keybind: M to switch)" -- **[UPDATED TOOLTIP]**
+            tooltipLabel_method2.Text = "Invisibility Method 2:\nBox Method (Keybind: M to switch)" -- **[UPDATED TOOLTIP]**
             game.StarterGui:SetCore("SendNotification", {
                 Title = "Method Changed";
                 Duration = 1;
-                Text = "Invisibility method set to: Seat Teleport.";
+                Text = "Invisibility method set to: Method 1 - Seat Teleport."; -- **[UPDATED NOTIFICATION]**
+            })
+        elseif methodNumber == 2 then -- **[NEW Method 2 Logic in setMethod]**
+            methodButton1.Text = "Method 1: Seat" -- **[UPDATED TEXT]**
+            methodButton2.Text = "Method 2: Box" -- **[UPDATED TEXT]**
+            tooltipLabel_method1.Text = "Invisibility Method 1:\nSeat Teleport (Keybind: M to switch)" -- **[UPDATED TOOLTIP]**
+            tooltipLabel_method2.Text = "Invisibility Method 2:\nBox Method (Active Method, Keybind: M to switch)" -- **[UPDATED TOOLTIP]**
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Method Changed";
+                Duration = 1;
+                Text = "Invisibility method set to: Method 2 - Box Method."; -- **[UPDATED NOTIFICATION]**
             })
         end
     end
@@ -999,7 +1203,7 @@ local function loadInvisUI()
         local keyCodes = string.split(keybindText, ",") -- Split by commas
 
         local newKeybinds = {}
-        local keyNames = {"toggle_invis", "toggle_fake_character", "hide_ui", "toggle_walkspeed_boost", "toggle_noclip", "load_ui"} -- Order MUST match input, include load_ui
+        local keyNames = {"toggle_invis", "toggle_fake_character", "hide_ui", "toggle_walkspeed_boost", "toggle_noclip", "switch_method", "load_ui"} -- **[UPDATED KEYNAMES]**
 
         for i, keyCodeString in ipairs(keyCodes) do
             keyCodeString = string.trim(keyCodeString) -- Remove extra spaces
@@ -1011,7 +1215,7 @@ local function loadInvisUI()
                 game.StarterGui:SetCore("SendNotification", {
                     Title = "Invalid Keybind";
                     Duration = 3;
-                    Text = "Invalid key code: '" .. keyCodeString .. "' or too many/few keycodes. Using defaults (Z,N,K,B,X,L). Example: Z,N,K,B,X,L";
+                    Text = "Invalid key code: '" .. keyCodeString .. "' or too many/few keycodes. Using defaults (Z,N,K,B,X,M,L). Example: Z,N,K,B,X,M,L"; -- **[UPDATED EXAMPLE]**
                 })
                 -- If error, revert to default keybinds and reset textbox text
                 newKeybinds = {
@@ -1020,6 +1224,7 @@ local function loadInvisUI()
                     hide_ui = Enum.KeyCode.K,
                     toggle_walkspeed_boost = Enum.KeyCode.B,
                     toggle_noclip = Enum.KeyCode.X,
+                    switch_method = Enum.KeyCode.M,
                     load_ui = Enum.KeyCode.L
                 }
                 local defaultKeybindText = ""
@@ -1069,12 +1274,14 @@ local function loadInvisUI()
     debugButton.MouseButton1Click:Connect(function() DEBUG_MODE = not DEBUG_MODE; buttonClickSound:Play();  game.StarterGui:SetCore("SendNotification", {Title = "Debug Mode Toggled";Duration = 1; Text = "Debug mode is now " .. (DEBUG_MODE and "ON" or "OFF");}) end)
     hideUIButton.MouseButton1Click:Connect(toggleUIHide)
     methodButton1.MouseButton1Click:Connect(function() setMethod(1) end)
+    methodButton2.MouseButton1Click:Connect(function() setMethod(2) end) -- **[NEW Method 2 Button Event]**
     fakeCharacterButton.MouseButton1Click:Connect(toggleFakeCharacter)
     keybindToggleButton.MouseButton1Click:Connect(toggleKeybinds)
     walkSpeedBoostButton.MouseButton1Click:Connect(toggleWalkSpeedBoost)
     noclipButton.MouseButton1Click:Connect(toggleNoClip)
+    serverInvisButton.MouseButton1Click:Connect(toggleServerInvisibility) -- **[NEW Admin Button Event]**
     summonUIButton.MouseButton1Click:Connect(loadInvisUI)
-    howDoesItWorkLabel.MouseButton1Click:Connect(function() game.StarterGui:SetCore("SendNotification", {Title = "How to Use";Duration = 5; Text = "Toggle features using buttons or keybinds (if enabled). Edit keybinds in textbox below. 'Seat' method teleports you to a location briefly. 'Fake Char' spawns a dummy. 'Speed Boost' increases walk speed. 'NoClip' allows walking through walls. 'Reload UI' reloads the UI.";}) end)
+    howDoesItWorkLabel.MouseButton1Click:Connect(function() game.StarterGui:SetCore("SendNotification", {Title = "How to Use";Duration = 5; Text = "Toggle features using buttons or keybinds (if enabled). Edit keybinds in textbox below. Method 1 'Seat' teleports you to a location briefly. Method 2 'Box' puts you in a box. 'Fake Char' spawns a dummy. 'Speed Boost' increases walk speed. 'NoClip' allows walking through walls. 'Server Invis' (ADMIN) is a placeholder. 'Reload UI' reloads the UI.";}) end) -- **[UPDATED HOW TO USE TEXT]**
     keybindsTextBox.FocusLost:Connect(updateKeybinds)
     walkSpeedTextBox.FocusLost:Connect(function() -- Placeholder for future speed textbox logic if needed, currently handled in toggleWalkSpeedBoost
         local speedValue = tonumber(walkSpeedTextBox.Text)
@@ -1096,6 +1303,8 @@ local function loadInvisUI()
     hideUIButton.MouseLeave:Connect(function() tooltipLabel_hideUI.Visible = false end)
     methodButton1.MouseEnter:Connect(function() tooltipLabel_method1.Visible = true end)
     methodButton1.MouseLeave:Connect(function() tooltipLabel_method1.Visible = false end)
+    methodButton2.MouseEnter:Connect(function() tooltipLabel_method2.Visible = true end) -- **[NEW Method 2 Tooltip Events]**
+    methodButton2.MouseLeave:Connect(function() tooltipLabel_method2.Visible = false end)
     fakeCharacterButton.MouseEnter:Connect(function() tooltipLabel_fakeCharacter.Visible = true end)
     fakeCharacterButton.MouseLeave:Connect(function() tooltipLabel_fakeCharacter.Visible = false end)
     keybindToggleButton.MouseEnter:Connect(function() tooltipLabel_keybindToggle.Visible = true end)
@@ -1108,6 +1317,8 @@ local function loadInvisUI()
     walkSpeedTextBox.MouseLeave:Connect(function() tooltipLabel_walkSpeedTextBox.Visible = false end)
     noclipButton.MouseEnter:Connect(function() tooltipLabel_noclip.Visible = true end) -- **[NEW] NoClip Button Tooltip Events**
     noclipButton.MouseLeave:Connect(function() tooltipLabel_noclip.Visible = false end)
+    serverInvisButton.MouseEnter:Connect(function() tooltipLabel_serverInvis.Visible = true end) -- **[NEW Admin Button Tooltip Events]**
+    serverInvisButton.MouseLeave:Connect(function() tooltipLabel_serverInvis.Visible = false end)
 
 
     -- **Keybind Input Handling**
@@ -1126,22 +1337,24 @@ local function loadInvisUI()
                 toggleNoClip()
             elseif keyCode == keybinds.load_ui then -- **[NEW - Load UI Keybind]**
                 loadInvisUI()
+            elseif keyCode == keybinds.switch_method then -- **[NEW - Switch Method Keybind]**
+                setMethod(current_method == 1 and 2 or 1) -- Toggle between method 1 and 2
             end
         end
     end)
 
     -- **Initial Textbox Text Setup:** Set textbox text to current keybinds at UI load
     local initialKeybindText = ""
-    local keyNames = {"toggle_invis", "toggle_fake_character", "hide_ui", "toggle_walkspeed_boost", "toggle_noclip", "load_ui"} -- Include load_ui in keynames
+    local keyNames = {"toggle_invis", "toggle_fake_character", "hide_ui", "toggle_walkspeed_boost", "toggle_noclip", "switch_method", "load_ui"} -- **[UPDATED KEYNAMES]**
     for i, name in ipairs(keyNames) do
         initialKeybindText = initialKeybindText .. keybinds[name].Name .. (i < #keyNames and "," or "")
     end
     keybindsTextBox.Text = initialKeybindText
 
 
-    if DEBUG_MODE then print("LoadInvisUI: UI Load complete.") end
+    if DEBUG_MODE then print("LoadInvisUI: UI Load complete. Version: " .. scriptVersion) end -- **[NEW] Version in Debug Print**
     game.StarterGui:SetCore("SendNotification", {
-        Title = "Invis UI Loaded";
+        Title = "Invis UI Loaded " .. scriptVersion; -- **[NEW] Version in Load Notification**
         Duration = 2;
         Text = "Invisibility UI loaded successfully!";
     })
@@ -1157,10 +1370,9 @@ userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
 end)
 
 
-if DEBUG_MODE then print("Invis Script Initialized. Press 'L' to load UI.") end -- Updated message!
+if DEBUG_MODE then print("Invis Script Initialized. Press 'L' to load UI. Version: " .. scriptVersion) end -- **[NEW] Version in Init Message**
 game.StarterGui:SetCore("SendNotification", {
-    Title = "Invis Script Loaded";
+    Title = "Invis Script Loaded " .. scriptVersion; -- **[NEW] Version in Notification**
     Duration = 3;
     Text = "Press 'L' to load the Invisibility UI."; -- Updated message!
 })
-```
