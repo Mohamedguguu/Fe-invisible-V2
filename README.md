@@ -1,5 +1,7 @@
 # 🚀 UNIVERSAL INVISIBLE SCRIPT FE FOR ROBLOX EXPLOITING 🎭
 
+WARNING:Its beta so be ready for more updates For invisible Fe V2
+
 🔥 **Hello!** This is a **powerful** universal invisible FE script for Roblox, allowing you to go **fully invisible** in any game effortlessly! 💨
 
 ## 🎨 GUI Library
@@ -18,7 +20,8 @@ loadstring(game:HttpGet(('https://raw.githubusercontent.com/Mohamedguguu/invisib
 ```
 
 ## 🛠️ Supported Executors
-This script is supported on the following executors:
+This script is supported on the following executors:\
+**Venex Executors** means any executor made with Venex Dll i Support them
 - **Venex** FIRE
 - **Xeno** ⚡
 - **Argon** 🔥
@@ -27,8 +30,7 @@ This script is supported on the following executors:
 - **And many more!**
 
 ## ✨ Credits
-- 👑 **Script created by:** mohamedguguu
-- 🤝 **With the help of:** .schlonny
+- 👑 **Script created by:** mohamedgugu
 -🤝 Uni gave me image 
 
 ## 🐞 Bug Reports & Community
