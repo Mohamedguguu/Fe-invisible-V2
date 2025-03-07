@@ -59,6 +59,7 @@ local current_method = 1
 local ui_hidden = false
 local screenGui = nil
 local userInputService = game:GetService("UserInputService")
+local Coregui = game:GetService("CoreGui")
 local player = game.Players.LocalPlayer
 local buttonClickSound = nil
 local runService = game:GetService("RunService")
@@ -118,7 +119,7 @@ local function loadInvisUI()
     screenGui = Instance.new("ScreenGui")
     screenGui.DisplayOrder = 10
     screenGui.ResetOnSpawn = false
-    screenGui.Parent = player:WaitForChild("PlayerGui")
+    screenGui.Parent = Coregui
     screenGui.Name = "InvisScreenGui"
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
