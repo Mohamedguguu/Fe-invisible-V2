@@ -28,7 +28,7 @@ This script is supported on the following executors:\
 - **Solara** 🌟
 - **Syn Z** :)
 - **And many more!**
-
+- **Syrix** 🔥
 ## ✨ Credits
 - 👑 **Script created by:** mohamedgugu
 -🤝 Uni gave me image 
