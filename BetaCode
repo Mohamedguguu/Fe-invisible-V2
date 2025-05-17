@@ -1,176 +1,167 @@
-local ScriptStarted = false
-local Keybind = "E"
-local Transparency = true
-local NoClip = false
+--// Button position and size variables
+local buttonSize = UDim2.new(0, 50, 0, 50)
+local buttonPosition = UDim2.new(1, -120, 0, 10)
 
+local invis_on = false
+local VOID_Y = -50 -- Adjust as needed for your map's lowest point
+local SAFE_SPAWN = Vector3.new(0, 100, 0) -- Safe point if player falls into void
+local lastDeathCause = "Unknown"
+
+--// Utility functions
 local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
-local SoundService = game:GetService("SoundService")
-local StarterGui = game:GetService("StarterGui")
+local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
-local IsInvisible = false
-local CanInvis = true
-local AnchorPart
-local FakeCharacter
-local PseudoAnchor
-local RealCharacter
-
--- Waits for HumanoidRootPart to exist
-local function GetHumanoidRootPart(character)
-    local tries = 0
-    while character and not character:FindFirstChild("HumanoidRootPart") and tries < 40 do
-        tries = tries + 1
-        character.ChildAdded:Wait()
-    end
-    return character and character:FindFirstChild("HumanoidRootPart")
+local function notify(title, text)
+    pcall(function()
+        game.StarterGui:SetCore("SendNotification", {Title = title, Text = text or "", Duration = 2})
+    end)
+    print(title .. (text and (": " .. text) or ""))
 end
 
-function CleanUpFake()
-    if FakeCharacter then pcall(function() FakeCharacter:Destroy() end) end
-    if AnchorPart then pcall(function() AnchorPart:Destroy() end) end
-    FakeCharacter = nil
-    AnchorPart = nil
+local function safeGetCharacter()
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    return character
 end
 
-function CreateFakeCharacter()
-    CleanUpFake()
-    if not RealCharacter then warn("No RealCharacter!"); return end
-    local rootPart = GetHumanoidRootPart(RealCharacter)
-    if not rootPart then warn("HumanoidRootPart not found in RealCharacter!"); return end
-
-    RealCharacter.Archivable = true
-    FakeCharacter = RealCharacter:Clone()
-    FakeCharacter.Parent = workspace
-
-    -- Anchor part above the real character
-    AnchorPart = Instance.new("Part")
-    AnchorPart.Anchored = true
-    AnchorPart.Size = Vector3.new(10, 1, 10)
-    AnchorPart.CFrame = rootPart.CFrame * CFrame.new(0, 50, 0)
-    AnchorPart.Transparency = 1
-    AnchorPart.CanCollide = false
-    AnchorPart.Parent = workspace
-
-    FakeCharacter:MoveTo(AnchorPart.Position + Vector3.new(0, 5, 0))
-
-    -- Optionally, set noclip
-    if NoClip and FakeCharacter:FindFirstChildWhichIsA("Humanoid") then
-        FakeCharacter:FindFirstChildWhichIsA("Humanoid"):ChangeState(11)
+local function setCharacterTransparency(transparency)
+    local character = LocalPlayer.Character
+    if not character then
+        warn("Character not found.")
+        notify("Error", "Character missing.")
+        return false
     end
-
-    -- Set transparency
-    if Transparency then
-        for _, v in pairs(FakeCharacter:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.Transparency = 0.7
-            end
+    for _, part in ipairs(character:GetDescendants()) do
+        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+            part.Transparency = transparency
         end
     end
-
-    -- Disable LocalScripts
-    for _, v in pairs(FakeCharacter:GetChildren()) do
-        if v:IsA("LocalScript") then
-            v.Disabled = true
-        end
-    end
-
-    PseudoAnchor = FakeCharacter:FindFirstChild("HumanoidRootPart")
+    return true
 end
 
-function OnCharacterDied()
-    CanInvis = false
-    CleanUpFake()
+--// Create UI Button
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local invisButton = Instance.new("TextButton")
+invisButton.Parent = screenGui
+invisButton.Size = buttonSize
+invisButton.Position = buttonPosition
+invisButton.Text = ""
+invisButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+invisButton.BackgroundTransparency = 0.5
+invisButton.BorderSizePixel = 0
+invisButton.Name = "InvisButton"
+invisButton.ClipsDescendants = true
+invisButton.AutoButtonColor = false
+local uicorner = Instance.new("UICorner", invisButton)
+uicorner.CornerRadius = UDim.new(1, 0)
+
+--// Invisibility Logic
+local function clearInvisChair()
+    if workspace:FindFirstChild("invischair") then
+        workspace.invischair:Destroy()
+    end
 end
 
-function Invisible()
-    if not FakeCharacter or not RealCharacter then return end
-    local realRoot = RealCharacter:FindFirstChild("HumanoidRootPart")
-    local fakeRoot = FakeCharacter:FindFirstChild("HumanoidRootPart")
-    if not realRoot or not fakeRoot then warn("Missing HumanoidRootPart for swap!"); return end
+local function toggleInvisibility()
+    local character = LocalPlayer.Character
+    local hrp = character and character:FindFirstChild("HumanoidRootPart")
+    if not character or not hrp then
+        warn("Character or HRP missing.")
+        notify("Error", "Character or HRP missing.")
+        return
+    end
 
-    if not IsInvisible then
-        -- Swap positions
-        local storedCF = realRoot.CFrame
-        realRoot.CFrame = fakeRoot.CFrame
-        fakeRoot.CFrame = storedCF
+    invis_on = not invis_on
 
-        if RealCharacter:FindFirstChildWhichIsA("Humanoid") then
-            RealCharacter:FindFirstChildWhichIsA("Humanoid"):UnequipTools()
+    if invis_on then
+        if not setCharacterTransparency(0.5) then return end
+        local savedpos = hrp.CFrame
+        hrp.CFrame = CFrame.new(-25.95, 84, 3537.55)
+        task.wait(0.15)
+        local Seat = Instance.new('Seat')
+        Seat.Anchored = false
+        Seat.CanCollide = false
+        Seat.Name = 'invischair'
+        Seat.Transparency = 1
+        Seat.Position = Vector3.new(-25.95, 84, 3537.55)
+        Seat.Parent = workspace
+        local torso = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
+        if not torso then
+            warn("No Torso/UpperTorso found.")
+            notify("Error", "No Torso/UpperTorso found.")
+            return
         end
-        Player.Character = FakeCharacter
-        workspace.CurrentCamera.CameraSubject = FakeCharacter:FindFirstChildWhichIsA("Humanoid")
-
-        -- Enable scripts in fake char
-        for _, v in pairs(FakeCharacter:GetChildren()) do
-            if v:IsA("LocalScript") then
-                v.Disabled = false
-            end
-        end
-
-        IsInvisible = true
+        local Weld = Instance.new("Weld")
+        Weld.Part0 = Seat
+        Weld.Part1 = torso
+        Weld.Parent = Seat
+        hrp.CFrame = savedpos
+        notify("Invis On", "worked")
     else
-        -- Swap back
-        local storedCF = fakeRoot.CFrame
-        fakeRoot.CFrame = realRoot.CFrame
-        realRoot.CFrame = storedCF
-
-        if FakeCharacter:FindFirstChildWhichIsA("Humanoid") then
-            FakeCharacter:FindFirstChildWhichIsA("Humanoid"):UnequipTools()
-        end
-        Player.Character = RealCharacter
-        workspace.CurrentCamera.CameraSubject = RealCharacter:FindFirstChildWhichIsA("Humanoid")
-
-        -- Disable scripts in fake char
-        for _, v in pairs(FakeCharacter:GetChildren()) do
-            if v:IsA("LocalScript") then
-                v.Disabled = true
-            end
-        end
-
-        IsInvisible = false
+        if not setCharacterTransparency(0) then return end
+        clearInvisChair()
+        notify("Invis Off", "worked")
     end
 end
 
--- Setup
-local function SetupCharacter(char)
-    RealCharacter = char
-    CreateFakeCharacter()
-    local humanoid = RealCharacter:FindFirstChildWhichIsA("Humanoid")
-    if humanoid then
-        humanoid.Died:Connect(OnCharacterDied)
-    end
-end
-
-if Player.Character then
-    SetupCharacter(Player.Character)
-end
-
-Player.CharacterAdded:Connect(function(char)
-    SetupCharacter(char)
-end)
-
-UserInputService.InputBegan:Connect(function(input, processed)
-    if processed then return end
-    if input.KeyCode.Name:lower() == Keybind:lower() and CanInvis then
-        Invisible()
+invisButton.MouseButton1Click:Connect(function()
+    local success, err = pcall(toggleInvisibility)
+    if not success then
+        warn("Error toggling invisibility:", err)
+        notify("Error", "Script error occurred.")
     end
 end)
 
+--// Prevent player from falling into the void
 RunService.RenderStepped:Connect(function()
-    if PseudoAnchor and AnchorPart then
-        PseudoAnchor.CFrame = AnchorPart.CFrame * CFrame.new(0, 5, 0)
+    local character = LocalPlayer.Character
+    local hrp = character and character:FindFirstChild("HumanoidRootPart")
+    if character and hrp and hrp.Position.Y < VOID_Y then
+        lastDeathCause = "Fell into void"
+        hrp.CFrame = CFrame.new(SAFE_SPAWN)
+        notify("Recovered", "Player teleported to safety!")
     end
 end)
 
--- Notification and sound
-local Sound = Instance.new("Sound", SoundService)
-Sound.SoundId = "rbxassetid://232127604"
-Sound:Play()
-StarterGui:SetCore("SendNotification", {
-    Title = "Invisible Toggle Loaded",
-    Text = "Press "..Keybind.." to change visibility.",
-    Duration = 20,
-    Button1 = "Okay."
-})
+--// Death & Respawn Handlers
+local function onDeath()
+    local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        local deadType = humanoid:GetState() == Enum.HumanoidStateType.Physics and "Physics" or humanoid:GetState().Name
+        if lastDeathCause == "Fell into void" then
+            print("Player died to void.")
+            notify("Death", "You fell into the void!")
+        elseif humanoid.Health == 0 then
+            print("Player died: Health reached zero (" .. deadType .. ")")
+            notify("Death", "You died (" .. deadType .. ")")
+        else
+            print("Player died: Unknown cause.")
+            notify("Death", "Unknown cause.")
+        end
+    end
+    clearInvisChair()
+    invis_on = false
+end
+
+local function setupDeathListener()
+    local character = safeGetCharacter()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.Died:Connect(onDeath)
+    end
+end
+
+LocalPlayer.CharacterAdded:Connect(function(char)
+    task.wait(0.1)
+    setupDeathListener()
+    -- restore invis state after respawn, if desired
+    if invis_on then
+        setCharacterTransparency(0.5)
+        notify("Info", "Invisibility restored after respawn.")
+    end
+end)
+
+--// Initial setup
+setupDeathListener()
