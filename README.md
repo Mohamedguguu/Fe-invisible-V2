@@ -2,10 +2,10 @@
 
 WARNING:Its beta so be ready for more updates For invisible Fe V2
 
-🔥 **Hello!** This is a **powerful** universal invisible FE script for Roblox, allowing you to go **fully invisible** in any game effortlessly! 💨
+🔥 **Hello!** This is a **powerful** universal invisible FE script for Roblox, allowing you to go **fully invisible** in any game SERVERSIDE  effortlessly ! 💨
 
 ## 🎨 GUI Library
-🛠️ The GUI was made using **Schlonny's UI Library**, ensuring a **smooth** and **user-friendly** experience.
+🛠️ The GUI was made using *Byme*, ensuring a **smooth** and **user-friendly** experience.
 
 ## 📜 Script Information
 - ✅ **Made with:** Lua
