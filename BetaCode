@@ -1,1 +1,146 @@
+local ScriptStarted = false
+local Keybind = "E"
+local Transparency = true
+local NoClip = false
 
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local RealCharacter = Player.Character or Player.CharacterAdded:Wait()
+local UserInputService = game:GetService("UserInputService")
+local SoundService = game:GetService("SoundService")
+local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
+
+local IsInvisible = false
+local CanInvis = true
+local AnchorPart
+local FakeCharacter
+local PseudoAnchor
+
+function CleanUpFake()
+    if FakeCharacter then FakeCharacter:Destroy() end
+    if AnchorPart then AnchorPart:Destroy() end
+    FakeCharacter = nil
+    AnchorPart = nil
+end
+
+function CreateFakeCharacter()
+    CleanUpFake()
+    RealCharacter.Archivable = true
+    FakeCharacter = RealCharacter:Clone()
+    FakeCharacter.Parent = workspace
+
+    -- Anchor part in a safe, out-of-sight spot (above the map)
+    AnchorPart = Instance.new("Part")
+    AnchorPart.Anchored = true
+    AnchorPart.Size = Vector3.new(10, 1, 10)
+    AnchorPart.CFrame = RealCharacter.HumanoidRootPart.CFrame * CFrame.new(0, 50, 0) -- 50 studs above current position
+    AnchorPart.Transparency = 1
+    AnchorPart.CanCollide = false
+    AnchorPart.Parent = workspace
+
+    FakeCharacter:MoveTo(AnchorPart.Position + Vector3.new(0, 5, 0))
+
+    -- Optionally, set noclip
+    if NoClip then
+        FakeCharacter.Humanoid:ChangeState(11)
+    end
+
+    -- Set transparency
+    if Transparency then
+        for _, v in pairs(FakeCharacter:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.Transparency = 0.7
+            end
+        end
+    end
+
+    -- Disable LocalScripts
+    for _, v in pairs(FakeCharacter:GetChildren()) do
+        if v:IsA("LocalScript") then
+            v.Disabled = true
+        end
+    end
+
+    PseudoAnchor = FakeCharacter.HumanoidRootPart
+end
+
+function OnCharacterDied()
+    CanInvis = false
+    CleanUpFake()
+end
+
+function Invisible()
+    if not FakeCharacter or not RealCharacter then return end
+    if not RealCharacter:FindFirstChild("HumanoidRootPart") or not FakeCharacter:FindFirstChild("HumanoidRootPart") then return end
+
+    if not IsInvisible then
+        -- Swap positions
+        local storedCF = RealCharacter.HumanoidRootPart.CFrame
+        RealCharacter.HumanoidRootPart.CFrame = FakeCharacter.HumanoidRootPart.CFrame
+        FakeCharacter.HumanoidRootPart.CFrame = storedCF
+
+        RealCharacter.Humanoid:UnequipTools()
+        Player.Character = FakeCharacter
+        workspace.CurrentCamera.CameraSubject = FakeCharacter.Humanoid
+        -- Enable scripts in fake char
+        for _, v in pairs(FakeCharacter:GetChildren()) do
+            if v:IsA("LocalScript") then
+                v.Disabled = false
+            end
+        end
+
+        IsInvisible = true
+    else
+        -- Swap back
+        local storedCF = FakeCharacter.HumanoidRootPart.CFrame
+        FakeCharacter.HumanoidRootPart.CFrame = RealCharacter.HumanoidRootPart.CFrame
+        RealCharacter.HumanoidRootPart.CFrame = storedCF
+
+        FakeCharacter.Humanoid:UnequipTools()
+        Player.Character = RealCharacter
+        workspace.CurrentCamera.CameraSubject = RealCharacter.Humanoid
+
+        -- Disable scripts in fake char
+        for _, v in pairs(FakeCharacter:GetChildren()) do
+            if v:IsA("LocalScript") then
+                v.Disabled = true
+            end
+        end
+
+        IsInvisible = false
+    end
+end
+
+-- Setup
+CreateFakeCharacter()
+RealCharacter.Humanoid.Died:Connect(OnCharacterDied)
+Player.CharacterAdded:Connect(function(char)
+    RealCharacter = char
+    CreateFakeCharacter()
+    RealCharacter.Humanoid.Died:Connect(OnCharacterDied)
+end)
+
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.KeyCode.Name:lower() == Keybind:lower() and CanInvis then
+        Invisible()
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if PseudoAnchor and AnchorPart then
+        PseudoAnchor.CFrame = AnchorPart.CFrame * CFrame.new(0, 5, 0)
+    end
+end)
+
+-- Notification and sound
+local Sound = Instance.new("Sound", SoundService)
+Sound.SoundId = "rbxassetid://232127604"
+Sound:Play()
+StarterGui:SetCore("SendNotification", {
+    Title = "Invisible Toggle Loaded",
+    Text = "Press "..Keybind.." to change visibility.",
+    Duration = 20,
+    Button1 = "Okay."
+})
