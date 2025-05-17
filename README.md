@@ -21,7 +21,7 @@ loadstring(game:HttpGet(('https://raw.githubusercontent.com/Mohamedguguu/invisib
 
 ## 🛠️ Supported Executors
 This script is supported on the following executors:\
-**Venex Executors** means any executor made with Venex Dll i Support them
+**Venex Executors** means any executor made with  Dll i Support them
 - **Venex** FIRE
 - **Xeno** ⚡
 - **Argon** 🔥
@@ -29,6 +29,7 @@ This script is supported on the following executors:\
 - **Syn Z** :)
 - **And many more!**
 - **Syrix** 🔥
+- CLoudy 
 ## ✨ Credits
 - 👑 **Script created by:** mohamedgugu
 -🤝 Uni gave me image 
