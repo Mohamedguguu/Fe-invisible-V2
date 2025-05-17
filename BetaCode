@@ -1,17 +1,43 @@
---// Button position and size variables
-local buttonSize = UDim2.new(0, 50, 0, 50)
-local buttonPosition = UDim2.new(1, -120, 0, 10)
+--[[
+  Invisible V1 Script by Mohamed (IMPROVED)
+  Features:
+  - Prevents duplicate script runs.
+  - Handles player death, void falls, and errors.
+  - Restores invisibility after respawn.
+  - Notifies player of all important script events.
+--]]
+
+-- Prevent the script from being run multiple times
+if getgenv and getgenv().InvisibleScriptRunning then
+    pcall(function()
+        game.StarterGui:SetCore("SendNotification", {
+            Title = "Script Already Running";
+            Text = "This script is already running!";
+            Duration = 3;
+        })
+    end)
+    warn("Invisible script is already running. Aborting duplicate execution.")
+    return
+elseif getgenv then
+    getgenv().InvisibleScriptRunning = true
+end
+
+--// Settings
+local BUTTON_SIZE = UDim2.new(0, 50, 0, 50)
+local BUTTON_POSITION = UDim2.new(1, -120, 0, 10)
+local VOID_Y = -50 -- Y position considered as void
+local SAFE_SPAWN = Vector3.new(0, 100, 0) -- Y=100 is safe spawn
+local INVIS_POSITION = Vector3.new(-25.95, 84, 3537.55)
 
 local invis_on = false
-local VOID_Y = -50 -- Adjust as needed for your map's lowest point
-local SAFE_SPAWN = Vector3.new(0, 100, 0) -- Safe point if player falls into void
 local lastDeathCause = "Unknown"
 
---// Utility functions
+--// Services
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
+--// Notifications
 local function notify(title, text)
     pcall(function()
         game.StarterGui:SetCore("SendNotification", {Title = title, Text = text or "", Duration = 2})
@@ -19,11 +45,7 @@ local function notify(title, text)
     print(title .. (text and (": " .. text) or ""))
 end
 
-local function safeGetCharacter()
-    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    return character
-end
-
+--// Character Transparency
 local function setCharacterTransparency(transparency)
     local character = LocalPlayer.Character
     if not character then
@@ -39,31 +61,14 @@ local function setCharacterTransparency(transparency)
     return true
 end
 
---// Create UI Button
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-
-local invisButton = Instance.new("TextButton")
-invisButton.Parent = screenGui
-invisButton.Size = buttonSize
-invisButton.Position = buttonPosition
-invisButton.Text = ""
-invisButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-invisButton.BackgroundTransparency = 0.5
-invisButton.BorderSizePixel = 0
-invisButton.Name = "InvisButton"
-invisButton.ClipsDescendants = true
-invisButton.AutoButtonColor = false
-local uicorner = Instance.new("UICorner", invisButton)
-uicorner.CornerRadius = UDim.new(1, 0)
-
---// Invisibility Logic
+--// Remove invischair if exists
 local function clearInvisChair()
     if workspace:FindFirstChild("invischair") then
         workspace.invischair:Destroy()
     end
 end
 
+--// Invisibility Toggle
 local function toggleInvisibility()
     local character = LocalPlayer.Character
     local hrp = character and character:FindFirstChild("HumanoidRootPart")
@@ -78,14 +83,14 @@ local function toggleInvisibility()
     if invis_on then
         if not setCharacterTransparency(0.5) then return end
         local savedpos = hrp.CFrame
-        hrp.CFrame = CFrame.new(-25.95, 84, 3537.55)
+        hrp.CFrame = CFrame.new(INVIS_POSITION)
         task.wait(0.15)
         local Seat = Instance.new('Seat')
         Seat.Anchored = false
         Seat.CanCollide = false
         Seat.Name = 'invischair'
         Seat.Transparency = 1
-        Seat.Position = Vector3.new(-25.95, 84, 3537.55)
+        Seat.Position = INVIS_POSITION
         Seat.Parent = workspace
         local torso = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
         if not torso then
@@ -105,6 +110,23 @@ local function toggleInvisibility()
         notify("Invis Off", "worked")
     end
 end
+
+--// Create UI Button
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+local invisButton = Instance.new("TextButton")
+invisButton.Parent = screenGui
+invisButton.Size = BUTTON_SIZE
+invisButton.Position = BUTTON_POSITION
+invisButton.Text = ""
+invisButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+invisButton.BackgroundTransparency = 0.5
+invisButton.BorderSizePixel = 0
+invisButton.Name = "InvisButton"
+invisButton.ClipsDescendants = true
+invisButton.AutoButtonColor = false
+local uicorner = Instance.new("UICorner", invisButton)
+uicorner.CornerRadius = UDim.new(1, 0)
 
 invisButton.MouseButton1Click:Connect(function()
     local success, err = pcall(toggleInvisibility)
@@ -146,7 +168,7 @@ local function onDeath()
 end
 
 local function setupDeathListener()
-    local character = safeGetCharacter()
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     if humanoid then
         humanoid.Died:Connect(onDeath)
@@ -156,12 +178,10 @@ end
 LocalPlayer.CharacterAdded:Connect(function(char)
     task.wait(0.1)
     setupDeathListener()
-    -- restore invis state after respawn, if desired
     if invis_on then
         setCharacterTransparency(0.5)
         notify("Info", "Invisibility restored after respawn.")
     end
 end)
 
---// Initial setup
 setupDeathListener()
