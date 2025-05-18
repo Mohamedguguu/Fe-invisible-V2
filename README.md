@@ -2,10 +2,10 @@
 
 WARNING:Its beta so be ready for more updates For invisible Fe V2
 
-🔥 **Hello!** This is a **powerful** universal invisible FE script for Roblox, allowing you to go **fully invisible** in any game SERVERSIDE  effortlessly ! 💨
+🔥 **Hello!** This is a **powerful** universal invisible FE script for Roblox, allowing you to go **fully invisible** in any game SERVERSIDE  effortlessly like bypass ! 💨
 
 ## 🎨 GUI Library
-🛠️ The GUI was made using *Byme*, ensuring a **smooth** and **user-friendly** experience.
+🛠️ The GUI was made using *Mohamedgugu*, ensuring a **smooth** and **user-friendly** experience.
 
 ## 📜 Script Information
 - ✅ **Made with:** Lua
@@ -18,7 +18,10 @@ To use this script, execute the following command in your preferred executor:
 ```lua
 loadstring(game:HttpGet(('https://raw.githubusercontent.com/Mohamedguguu/invisible-V1-BY-MU/refs/heads/main/Maincode'),true))()
 ```
-
+or you wanna test beta 
+```lua
+loadstring(game:HttpGet(('https://raw.githubusercontent.com/Mohamedguguu/invisible-V1-BY-MU/refs/heads/main/BetaCode'),true))()
+```
 ## 🛠️ Supported Executors
 This script is supported on the following executors:\
 **Venex Executors** means any executor made with  Dll i Support them
