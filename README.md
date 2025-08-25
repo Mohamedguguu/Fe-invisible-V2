@@ -1,6 +1,6 @@
 # 🚀 UNIVERSAL INVISIBLE SCRIPT FE FOR ROBLOX EXPLOITING 🎭
 
-WARNING:Its beta so be ready for more updates For invisible Fe V2
+WARNING:Its beta so be ready for more updates For invisible Fe V2.3
 
  **Hello!** This is a **powerful** universal invisible FE script for Roblox, allowing you to go **fully invisible** in any game SERVERSIDE  effortlessly like bypass ! 💨
 
@@ -30,9 +30,10 @@ This script is supported on the following executors:\
 - **Argon** --Deleted it got bough by yoru and bad people
 - **Solara** 
 - **Syn Z** :)--THEY DIDNT UPDATE WHERE IS SYNZ I GOT SCAMMED
-- **And many more!**
+-
 - **Syrix** --Gone the owner got a girlfriend so he had to leave
 - Cloudy
+-  **And many more!**
 ##  Credits
 -  **Script created by:** mohamedgugu
 - Uni gave me image 
