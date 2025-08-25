@@ -44,7 +44,7 @@ local InvisScriptLoaded = false
 local invis_transparency = 0.75
 
 -- Persistence config
-local SETTINGS_FOLDER = "Theirscrip"
+local SETTINGS_FOLDER = "FeInvisible"
 local SETTINGS_FILE = SETTINGS_FOLDER .. "/settings.txt"
 
 local function saveSettings()
@@ -337,7 +337,7 @@ local function unloadInvisUI()
 end
 
 local Window = Rayfield:CreateWindow({
-    Name = "FE Invisible V1",
+    Name = "FE Invisible V2.3",
     LoadingTitle = "FE Invisible Loader",
     LoadingSubtitle = "by Mohamedguguu",
     ConfigurationSaving = {
