@@ -1,8 +1,7 @@
-
-local VERSION = 1.2
+-- INVISIBLE GHOST 1.3
+local VERSION = 1.3
 print("Made By Mohamedguguu")
 
---------- prevent running script multiple times unless higher version
 if _G.InvisGhostLoaded and _G.InvisGhostLoaded >= VERSION then
     return
 end
@@ -13,6 +12,7 @@ local plr = Players.LocalPlayer
 
 local SETTINGS_FOLDER = "FeInvisibleOld"
 local SETTINGS_FILE = SETTINGS_FOLDER .. "/ghostspeed.txt"
+
 local function saveSpeed(speed)
     if isfolder and makefolder and writefile then
         if not isfolder(SETTINGS_FOLDER) then
@@ -29,16 +29,19 @@ local function loadSpeed()
             return val
         end
     end
-    return 25
+    return 50
 end
 
 local invisOn = false
 local ghostOn = false
 local noclipOn = false
 local ghostSpeed = loadSpeed()
+local uiHidden = false
+
 local sg = Instance.new("ScreenGui", plr:WaitForChild("PlayerGui"))
 sg.Name = "InvisGhostUI"
 sg.ResetOnSpawn = false
+
 local mainFrame = Instance.new("Frame", sg)
 mainFrame.Size = UDim2.new(0, 220, 0, 200)
 mainFrame.Position = UDim2.new(0.5, -110, 0.5, -100)
@@ -154,6 +157,7 @@ local function unload()
         workspace.invischair:Destroy()
     end
 end
+
 invisBtn.MouseButton1Click:Connect(toggleInvis)
 ghostBtn.MouseButton1Click:Connect(toggleGhost)
 noclipBtn.MouseButton1Click:Connect(toggleNoclip)
@@ -188,6 +192,9 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, gpe)
         toggleNoclip()
     elseif input.KeyCode == Enum.KeyCode.X then
         unload()
+    elseif input.KeyCode == Enum.KeyCode.K then
+        uiHidden = not uiHidden
+        mainFrame.Visible = not uiHidden
     end
 end)
---dont skid Litte bro plz
+--DONT SKID LITTE BRO DONT
