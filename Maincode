@@ -18,6 +18,7 @@ local DEBUG_MODE = true
 local keybinds_enabled_state = true
 local invis_enabled = true
 local fake_character_enabled = false
+local debounce = false
 local walkspeed_boost_enabled = false
 local originalCharacterColor = nil
 local fakeCharacterModel = nil
