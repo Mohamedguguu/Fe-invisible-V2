@@ -22,6 +22,10 @@ or you wanna test beta
 ```lua
 loadstring(game:HttpGet(('https://raw.githubusercontent.com/Mohamedguguu/invisible-V1-BY-MU/refs/heads/main/BetaCode'),true))()
 ```
+or you wanna use Old code
+```lua
+loadstring(game:HttpGet(('https://raw.githubusercontent.com/Mohamedguguu/invisible-V1-BY-MU/refs/heads/main/OldCode'),true))()
+```
 ##  Supported Executors
 This script is supported on the following executors:\
 **Venex Executors** means any executor made with  Dll i Support them -- these are gone api is down
@@ -45,5 +49,7 @@ If you find any bugs or issues, **send them here**  and we'll take a look!
 
 # SEE YOU LATER :)
 
+--DONT SKID BRO 
+--DONT STEAL IT BRO
 
 ![image-Photoroom](https://github.com/user-attachments/assets/d2d417a6-2b8c-474d-9701-07bd02dff145)
