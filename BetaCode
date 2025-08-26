@@ -1,6 +1,39 @@
-Print("beta is already out")
-wait(2.1)
-Print("Loading Main")
-loadstring(game:HttpGet(('https://raw.githubusercontent.com/Mohamedguguu/invisible-V1-BY-MU/refs/heads/main/Maincode'),true))()
-Print("Loadad")
-Print("made by Mohamedguguu")
+local CoreGui = game:GetService("CoreGui")
+local gui = Instance.new("ScreenGui", CoreGui)
+gui.Name = "BetaUI"
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 300, 0, 200)
+frame.Position = UDim2.new(0.5, -150, 0.5, -100)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+local function createButton(text, yPos)
+    local btn = Instance.new("TextButton", frame)
+    btn.Size = UDim2.new(0, 260, 0, 40)
+    btn.Position = UDim2.new(0, 20, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 20
+    btn.Text = text
+    return btn
+end
+local mainBtn = createButton("Run MainLoadstring", 20)
+local oldBtn = createButton("Run Oldcode", 70)
+local exitBtn = createButton("Exit", 120)
+mainBtn.MouseButton1Click:Connect(function()
+    print("beta is already out")
+    wait(2.1)
+    print("Loading Main")
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Mohamedguguu/invisible-V1-BY-MU/refs/heads/main/Maincode",true))()
+    print("Loadad")
+    print("made by Mohamedguguu")
+end)
+oldBtn.MouseButton1Click:Connect(function()
+    print("Loading Oldcode")
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Mohamedguguu/invisible-V1-BY-MU/refs/heads/main/OldCode",true))()
+end)
+exitBtn.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
