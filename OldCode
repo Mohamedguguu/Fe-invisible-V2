@@ -1,0 +1,179 @@
+-- GHOST INVIS FINAL by @pystYT + Mohamedguguu
+-- Version system
+local VERSION = 5.0
+if _G.GhostScriptLoaded and _G.GhostScriptVersion and _G.GhostScriptVersion >= VERSION then
+    warn("Script already running with same or higher version!")
+    return
+end
+_G.GhostScriptLoaded = true
+_G.GhostScriptVersion = VERSION
+
+print("Made By Mohamedguguu")
+
+local plr = game.Players.LocalPlayer
+local uis = game:GetService("UserInputService")
+local char = plr.Character or plr.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+local hum = char:WaitForChild("Humanoid")
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "UI_"..math.random(1000,9999)
+gui.Parent = plr:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 140, 0, 220)
+frame.Position = UDim2.new(1, -160, 0, 10)
+frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+frame.BackgroundTransparency = 0.2
+frame.Active = true
+frame.Draggable = true
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0,12)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(0,140,0,20)
+title.Position = UDim2.new(0,0,0,0)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(0,255,0)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 18
+title.Text = "Ghost Invs v"..VERSION
+
+local function mkBtn(txt,pos)
+    local b = Instance.new("TextButton", frame)
+    b.Size = UDim2.new(0, 120, 0, 35)
+    b.Position = pos
+    b.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    b.TextColor3 = Color3.new(1,1,1)
+    b.Font = Enum.Font.SourceSansBold
+    b.TextSize = 20
+    b.Text = txt
+    local c = Instance.new("UICorner", b)
+    c.CornerRadius = UDim.new(0,10)
+    return b
+end
+
+local invisBtn = mkBtn("👻 Ghost", UDim2.new(0,10,0,25))
+local noclipBtn = mkBtn("🚪 Noclip", UDim2.new(0,10,0,65))
+local speedBtn = mkBtn("⚡ GhostSpeed", UDim2.new(0,10,0,105))
+local unloadBtn = mkBtn("❌ Unload", UDim2.new(0,10,0,145))
+
+local speedBox = Instance.new("TextBox", frame)
+speedBox.Size = UDim2.new(0,120,0,30)
+speedBox.Position = UDim2.new(0,10,0,185)
+speedBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
+speedBox.TextColor3 = Color3.new(1,1,1)
+speedBox.Font = Enum.Font.SourceSansBold
+speedBox.TextSize = 18
+speedBox.PlaceholderText = "Enter Speed"
+speedBox.Text = ""
+local sc = Instance.new("UICorner", speedBox)
+sc.CornerRadius = UDim.new(0,10)
+
+local conns = {}
+local invis = false
+local noclip = false
+local db = false
+local normalSpeed = hum.WalkSpeed
+local ghostSpeed = 32
+
+local function setTransparency(v)
+    local c = plr.Character
+    if not c then return end
+    for _,p in pairs(c:GetDescendants()) do
+        if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then
+            p.Transparency = v
+        end
+    end
+end
+
+local function toggleInvis()
+    if db then return end
+    db = true
+    char = plr.Character or plr.CharacterAdded:Wait()
+    hrp = char:WaitForChild("HumanoidRootPart")
+    hum = char:WaitForChild("Humanoid")
+    invis = not invis
+    if invis then
+        setTransparency(0.5)
+        local saved = hrp.CFrame
+        task.wait()
+        hrp.CFrame = CFrame.new(-25.95,84,3537.55)
+        task.wait(0.15)
+        local seat = Instance.new("Seat",workspace)
+        seat.Anchored=false seat.CanCollide=false seat.Transparency=1
+        seat.Name="S_"..math.random(1000,9999)
+        seat.CFrame = CFrame.new(-25.95,84,3537.55)
+        local weld=Instance.new("Weld",seat)
+        weld.Part0=seat
+        weld.Part1=char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+        task.wait()
+        hrp.CFrame = saved
+        hum.WalkSpeed = ghostSpeed
+        game.StarterGui:SetCore("SendNotification",{Title="Ghost On";Duration=1;Text="Speed: "..ghostSpeed})
+    else
+        setTransparency(0)
+        for _,s in pairs(workspace:GetChildren()) do
+            if s:IsA("Seat") and s.Name:match("^S_%d+") then s:Destroy() end
+        end
+        hum.WalkSpeed = normalSpeed
+        game.StarterGui:SetCore("SendNotification",{Title="Ghost Off";Duration=1;Text=""})
+    end
+    task.wait(0.8)
+    db = false
+end
+
+local noclipLoop
+local function toggleNoclip()
+    noclip = not noclip
+    if noclip then
+        noclipLoop = game:GetService("RunService").Stepped:Connect(function()
+            if plr.Character then
+                for _,v in pairs(plr.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then v.CanCollide=false end
+                end
+            end
+        end)
+        game.StarterGui:SetCore("SendNotification",{Title="Noclip On";Duration=1;Text=""})
+    else
+        if noclipLoop then noclipLoop:Disconnect() noclipLoop=nil end
+        game.StarterGui:SetCore("SendNotification",{Title="Noclip Off";Duration=1;Text=""})
+    end
+end
+
+local function changeSpeed()
+    local val = tonumber(speedBox.Text)
+    if val and val>0 then
+        ghostSpeed = val
+        if invis then hum.WalkSpeed = ghostSpeed end
+        game.StarterGui:SetCore("SendNotification",{Title="Ghost Speed Set";Duration=1;Text="Speed = "..ghostSpeed})
+    else
+        game.StarterGui:SetCore("SendNotification",{Title="Invalid Speed";Duration=1;Text=""})
+    end
+end
+
+local function unload()
+    setTransparency(0)
+    hum.WalkSpeed = normalSpeed
+    for _,s in pairs(workspace:GetChildren()) do
+        if s:IsA("Seat") and s.Name:match("^S_%d+") then s:Destroy() end
+    end
+    if gui then gui:Destroy() end
+    for _,c in pairs(conns) do c:Disconnect() end
+    if noclipLoop then noclipLoop:Disconnect() end
+    _G.GhostScriptLoaded = false
+    game.StarterGui:SetCore("SendNotification",{Title="Unloaded";Duration=1;Text=""})
+end
+
+table.insert(conns,invisBtn.MouseButton1Click:Connect(toggleInvis))
+table.insert(conns,noclipBtn.MouseButton1Click:Connect(toggleNoclip))
+table.insert(conns,speedBtn.MouseButton1Click:Connect(changeSpeed))
+table.insert(conns,unloadBtn.MouseButton1Click:Connect(unload))
+table.insert(conns,uis.InputBegan:Connect(function(i,gp)
+    if gp then return end
+    if i.KeyCode==Enum.KeyCode.Z then toggleInvis()
+    elseif i.KeyCode==Enum.KeyCode.C then toggleNoclip()
+    elseif i.KeyCode==Enum.KeyCode.V then changeSpeed()
+    elseif i.KeyCode==Enum.KeyCode.X then unload() end
+end))
+
