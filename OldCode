@@ -1,4 +1,3 @@
--- INVISIBLE GHOST 1.3
 local VERSION = 1.3
 print("Made By Mohamedguguu")
 
@@ -9,6 +8,8 @@ _G.InvisGhostLoaded = VERSION
 
 local Players = game:GetService("Players")
 local CoreguiM = game:GetService("CoreGui")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local plr = Players.LocalPlayer
 
 local SETTINGS_FOLDER = "FeInvisibleOld"
@@ -49,9 +50,7 @@ mainFrame.Position = UDim2.new(0.5, -110, 0.5, -100)
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 mainFrame.Active = true
 mainFrame.Draggable = true
-
-local uicorner = Instance.new("UICorner", mainFrame)
-uicorner.CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
 
 local function makeButton(text, pos)
     local b = Instance.new("TextButton", mainFrame)
@@ -60,8 +59,7 @@ local function makeButton(text, pos)
     b.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     b.TextColor3 = Color3.new(1, 1, 1)
     b.Text = text
-    local c = Instance.new("UICorner", b)
-    c.CornerRadius = UDim.new(0, 8)
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
     return b
 end
 
@@ -76,8 +74,33 @@ speedBox.Position = UDim2.new(0, 10, 0, 130)
 speedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 speedBox.TextColor3 = Color3.new(1, 1, 1)
 speedBox.Text = tostring(ghostSpeed)
-local c2 = Instance.new("UICorner", speedBox)
-c2.CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0, 8)
+
+local function showNotice(txt)
+    pcall(function()
+        if CoreguiM:FindFirstChild("InvisGhostNotice") then
+            CoreguiM.InvisGhostNotice:Destroy()
+        end
+    end)
+    local g = Instance.new("ScreenGui", CoreguiM)
+    g.Name = "InvisGhostNotice"
+    g.ResetOnSpawn = false
+    local lbl = Instance.new("TextLabel", g)
+    lbl.Size = UDim2.new(0, 300, 0, 40)
+    lbl.Position = UDim2.new(0.5, -150, 0, 20)
+    lbl.BackgroundTransparency = 0.15
+    lbl.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    lbl.TextColor3 = Color3.new(1, 1, 1)
+    lbl.Text = txt
+    lbl.TextSize = 18
+    lbl.Font = Enum.Font.SourceSansSemibold
+    lbl.ZIndex = 9999
+    Instance.new("UICorner", lbl).CornerRadius = UDim.new(0, 8)
+    spawn(function()
+        task.wait(2)
+        pcall(function() g:Destroy() end)
+    end)
+end
 
 local function setTransparency(char, val)
     for _, p in ipairs(char:GetDescendants()) do
@@ -107,23 +130,47 @@ local function toggleInvis()
             Weld.Part0 = Seat
             Weld.Part1 = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
             Seat.CFrame = savedpos
+            showNotice("Invisibility Enabled")
         else
             setTransparency(char, 0)
             if workspace:FindFirstChild("invischair") then
                 workspace.invischair:Destroy()
             end
+            showNotice("Invisibility Disabled")
         end
     end
 end
 
+local ghostEnforceConn
 local function toggleGhost()
     ghostOn = not ghostOn
     local hum = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
     if hum then
         if ghostOn then
             hum.WalkSpeed = ghostSpeed
+            if ghostEnforceConn then
+                pcall(function() ghostEnforceConn:Disconnect() end)
+                ghostEnforceConn = nil
+            end
+            ghostEnforceConn = RunService.Stepped:Connect(function()
+                if hum and hum.WalkSpeed ~= ghostSpeed then
+                    pcall(function() hum.WalkSpeed = ghostSpeed end)
+                end
+            end)
+            showNotice("Ghost Enabled: " .. tostring(ghostSpeed))
         else
+            if ghostEnforceConn then
+                pcall(function() ghostEnforceConn:Disconnect() end)
+                ghostEnforceConn = nil
+            end
             hum.WalkSpeed = 16
+            showNotice("Ghost Disabled")
+        end
+    else
+        if ghostOn then
+            showNotice("Ghost Enabled: " .. tostring(ghostSpeed))
+        else
+            showNotice("Ghost Disabled")
         end
     end
 end
@@ -142,55 +189,70 @@ local function toggleNoclip()
                 end
             end
         end)
+        showNotice("Noclip Enabled")
     else
         if noclipConn then
-            noclipConn:Disconnect()
+            pcall(function() noclipConn:Disconnect() end)
+            noclipConn = nil
         end
+        showNotice("Noclip Disabled")
     end
 end
 
--- REAL unload
 local keybindConn
 local function unload()
-    if sg then sg:Destroy() end
+    if sg then
+        pcall(function() sg:Destroy() end)
+        sg = nil
+    end
     _G.InvisGhostLoaded = nil
-
-    if noclipConn then noclipConn:Disconnect() noclipConn = nil end
-    if keybindConn then keybindConn:Disconnect() keybindConn = nil end
-
+    if noclipConn then
+        pcall(function() noclipConn:Disconnect() end)
+        noclipConn = nil
+    end
+    if keybindConn then
+        pcall(function() keybindConn:Disconnect() end)
+        keybindConn = nil
+    end
+    if ghostEnforceConn then
+        pcall(function() ghostEnforceConn:Disconnect() end)
+        ghostEnforceConn = nil
+    end
     local char = plr.Character
     if char then
-        setTransparency(char, 0)
-        if workspace:FindFirstChild("invischair") then
-            workspace.invischair:Destroy()
-        end
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum.WalkSpeed = 16
-            hum.JumpPower = 50
-        end
+        pcall(function()
+            setTransparency(char, 0)
+            if workspace:FindFirstChild("invischair") then
+                workspace.invischair:Destroy()
+            end
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.WalkSpeed = 16
+                if hum.JumpPower then
+                    hum.JumpPower = 50
+                end
+            end
+        end)
     end
-
-    invisOn, ghostOn, noclipOn = false, false, false
-    print("✅ Invis Ghost unloaded (UI, noclip, keybinds disabled)")
+    invisOn = false
+    ghostOn = false
+    noclipOn = false
+    uiHidden = false
+    showNotice("Invis Ghost Unloaded")
 end
 
--- Confirm Unload UI
 local function confirmUnload()
     if CoreguiM:FindFirstChild("UnloadConfirmUI") then
         CoreguiM.UnloadConfirmUI:Destroy()
     end
-
     local confirmGui = Instance.new("ScreenGui", CoreguiM)
     confirmGui.Name = "UnloadConfirmUI"
     confirmGui.ResetOnSpawn = false
-
     local frame = Instance.new("Frame", confirmGui)
     frame.Size = UDim2.new(0, 250, 0, 120)
     frame.Position = UDim2.new(0.5, -125, 0.5, -60)
     frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
-
     local label = Instance.new("TextLabel", frame)
     label.Size = UDim2.new(1, 0, 0, 40)
     label.BackgroundTransparency = 1
@@ -198,7 +260,6 @@ local function confirmUnload()
     label.TextColor3 = Color3.new(1, 1, 1)
     label.Font = Enum.Font.SourceSansBold
     label.TextSize = 20
-
     local yesBtn = Instance.new("TextButton", frame)
     yesBtn.Size = UDim2.new(0.5, -5, 0, 40)
     yesBtn.Position = UDim2.new(0, 5, 1, -45)
@@ -206,7 +267,6 @@ local function confirmUnload()
     yesBtn.Text = "Yes"
     yesBtn.TextColor3 = Color3.new(1, 1, 1)
     Instance.new("UICorner", yesBtn).CornerRadius = UDim.new(0, 8)
-
     local noBtn = Instance.new("TextButton", frame)
     noBtn.Size = UDim2.new(0.5, -5, 0, 40)
     noBtn.Position = UDim2.new(0.5, 0, 1, -45)
@@ -214,22 +274,19 @@ local function confirmUnload()
     noBtn.Text = "No"
     noBtn.TextColor3 = Color3.new(1, 1, 1)
     Instance.new("UICorner", noBtn).CornerRadius = UDim.new(0, 8)
-
     yesBtn.MouseButton1Click:Connect(function()
-        confirmGui:Destroy()
+        pcall(function() confirmGui:Destroy() end)
         unload()
     end)
-
     noBtn.MouseButton1Click:Connect(function()
-        confirmGui:Destroy()
+        pcall(function() confirmGui:Destroy() end)
     end)
 end
-
 
 invisBtn.MouseButton1Click:Connect(toggleInvis)
 ghostBtn.MouseButton1Click:Connect(toggleGhost)
 noclipBtn.MouseButton1Click:Connect(toggleNoclip)
-unloadBtn.MouseButton1Click:Connect(unload)
+unloadBtn.MouseButton1Click:Connect(confirmUnload)
 
 speedBox.FocusLost:Connect(function(enter)
     if enter then
@@ -237,12 +294,13 @@ speedBox.FocusLost:Connect(function(enter)
         if val and val > 0 then
             ghostSpeed = val
             saveSpeed(ghostSpeed)
-            if ghostOn then
-                local hum = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
-                if hum then hum.WalkSpeed = ghostSpeed end
-            else
-                local hum = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
-                if hum then hum.WalkSpeed = 16 end
+            local hum = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
+            if hum then
+                if ghostOn then
+                    hum.WalkSpeed = ghostSpeed
+                else
+                    hum.WalkSpeed = 16
+                end
             end
         else
             speedBox.Text = tostring(ghostSpeed)
@@ -250,7 +308,7 @@ speedBox.FocusLost:Connect(function(enter)
     end
 end)
 
-game:GetService("UserInputService").InputBegan:Connect(function(input, gpe)
+keybindConn = UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.Z then
         toggleInvis()
@@ -258,11 +316,8 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, gpe)
         toggleGhost()
     elseif input.KeyCode == Enum.KeyCode.N then
         toggleNoclip()
-    elseif input.KeyCode == Enum.KeyCode.X then
-        unload()
     elseif input.KeyCode == Enum.KeyCode.K then
         uiHidden = not uiHidden
         mainFrame.Visible = not uiHidden
     end
 end)
---DONT SKID LITTE BRO DONT
