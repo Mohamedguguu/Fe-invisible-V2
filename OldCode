@@ -151,6 +151,7 @@ end
 
 local function unload()
     sg:Destroy()
+    _G.InvisGhostLoaded = nil
     if noclipConn then noclipConn:Disconnect() end
     local hum = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
     if hum then hum.WalkSpeed = 16 end
