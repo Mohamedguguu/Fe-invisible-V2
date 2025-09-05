@@ -8,6 +8,7 @@ end
 _G.InvisGhostLoaded = VERSION
 
 local Players = game:GetService("Players")
+local CoreguiM = game:GetService("CoreGui")
 local plr = Players.LocalPlayer
 
 local SETTINGS_FOLDER = "FeInvisibleOld"
@@ -38,7 +39,7 @@ local noclipOn = false
 local ghostSpeed = loadSpeed()
 local uiHidden = false
 
-local sg = Instance.new("ScreenGui", plr:WaitForChild("PlayerGui"))
+local sg = Instance.new("ScreenGui", CoreguiM)
 sg.Name = "InvisGhostUI"
 sg.ResetOnSpawn = false
 
