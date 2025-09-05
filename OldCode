@@ -150,15 +150,31 @@ local function toggleNoclip()
 end
 
 local function unload()
-    sg:Destroy()
+    if sg then sg:Destroy() end
     _G.InvisGhostLoaded = nil
-    if noclipConn then noclipConn:Disconnect() end
+
+    if noclipConn then
+        noclipConn:Disconnect()
+        noclipConn = nil
+    end
+    if keybindConn then
+        keybindConn:Disconnect()
+        keybindConn = nil
+    end
+
     local hum = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
-    if hum then hum.WalkSpeed = 16 end
+    if hum then
+        hum.WalkSpeed = 16
+        hum.JumpPower = 50 -- reset jump too (optional)
+    end
     if workspace:FindFirstChild("invischair") then
         workspace.invischair:Destroy()
     end
+
+    invisOn, ghostOn, noclipOn = false, false, false
+    print("✅ Invis Ghost unloaded (UI, noclip, keybinds all disabled)")
 end
+
 
 invisBtn.MouseButton1Click:Connect(toggleInvis)
 ghostBtn.MouseButton1Click:Connect(toggleGhost)
