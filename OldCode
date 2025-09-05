@@ -149,30 +149,80 @@ local function toggleNoclip()
     end
 end
 
+-- REAL unload
+local keybindConn
 local function unload()
     if sg then sg:Destroy() end
     _G.InvisGhostLoaded = nil
 
-    if noclipConn then
-        noclipConn:Disconnect()
-        noclipConn = nil
-    end
-    if keybindConn then
-        keybindConn:Disconnect()
-        keybindConn = nil
-    end
+    if noclipConn then noclipConn:Disconnect() noclipConn = nil end
+    if keybindConn then keybindConn:Disconnect() keybindConn = nil end
 
-    local hum = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
-    if hum then
-        hum.WalkSpeed = 16
-        hum.JumpPower = 50 -- reset jump too (optional)
-    end
-    if workspace:FindFirstChild("invischair") then
-        workspace.invischair:Destroy()
+    local char = plr.Character
+    if char then
+        setTransparency(char, 0)
+        if workspace:FindFirstChild("invischair") then
+            workspace.invischair:Destroy()
+        end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.WalkSpeed = 16
+            hum.JumpPower = 50
+        end
     end
 
     invisOn, ghostOn, noclipOn = false, false, false
-    print("✅ Invis Ghost unloaded (UI, noclip, keybinds all disabled)")
+    print("✅ Invis Ghost unloaded (UI, noclip, keybinds disabled)")
+end
+
+-- Confirm Unload UI
+local function confirmUnload()
+    if CoreguiM:FindFirstChild("UnloadConfirmUI") then
+        CoreguiM.UnloadConfirmUI:Destroy()
+    end
+
+    local confirmGui = Instance.new("ScreenGui", CoreguiM)
+    confirmGui.Name = "UnloadConfirmUI"
+    confirmGui.ResetOnSpawn = false
+
+    local frame = Instance.new("Frame", confirmGui)
+    frame.Size = UDim2.new(0, 250, 0, 120)
+    frame.Position = UDim2.new(0.5, -125, 0.5, -60)
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+    local label = Instance.new("TextLabel", frame)
+    label.Size = UDim2.new(1, 0, 0, 40)
+    label.BackgroundTransparency = 1
+    label.Text = "Are you sure to unload?"
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.Font = Enum.Font.SourceSansBold
+    label.TextSize = 20
+
+    local yesBtn = Instance.new("TextButton", frame)
+    yesBtn.Size = UDim2.new(0.5, -5, 0, 40)
+    yesBtn.Position = UDim2.new(0, 5, 1, -45)
+    yesBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
+    yesBtn.Text = "Yes"
+    yesBtn.TextColor3 = Color3.new(1, 1, 1)
+    Instance.new("UICorner", yesBtn).CornerRadius = UDim.new(0, 8)
+
+    local noBtn = Instance.new("TextButton", frame)
+    noBtn.Size = UDim2.new(0.5, -5, 0, 40)
+    noBtn.Position = UDim2.new(0.5, 0, 1, -45)
+    noBtn.BackgroundColor3 = Color3.fromRGB(0, 60, 0)
+    noBtn.Text = "No"
+    noBtn.TextColor3 = Color3.new(1, 1, 1)
+    Instance.new("UICorner", noBtn).CornerRadius = UDim.new(0, 8)
+
+    yesBtn.MouseButton1Click:Connect(function()
+        confirmGui:Destroy()
+        unload()
+    end)
+
+    noBtn.MouseButton1Click:Connect(function()
+        confirmGui:Destroy()
+    end)
 end
 
 
