@@ -1,5 +1,6 @@
-local VERSION = 1.3
+local VERSION = 1.5
 print("Made By Mohamedguguu")
+print("new update fixed unload not working and fixed speed noclip addad notic and remoed = unload and addad are you sure or not sure unloading")
 
 if _G.InvisGhostLoaded and _G.InvisGhostLoaded >= VERSION then
     return
