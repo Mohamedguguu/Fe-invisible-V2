@@ -29,9 +29,9 @@ loadstring(game:HttpGet(('https://raw.githubusercontent.com/Mohamedguguu/invisib
 ##  Supported Executors
 This script is supported on the following executors:\
 **Venex Executors** means any executor made with  Dll i Support them -- these are gone api is down
-- **Venex** FIRE--Owner Vanished of the world  Says i am not coming Back
+- **Venex** FIRE--Owner Vanished 
 - **Xeno** 
-- **Argon** --Deleted it got bough by yoru and bad people
+- **Argon** --Deleted it got bough by yoru 
 - **Solara** 
 - **Syn Z** :)--THEY DIDNT UPDATE WHERE IS SYNZ I GOT SCAMMED
 -
